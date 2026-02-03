@@ -543,6 +543,12 @@ h6,
     height: 1.1rem;
 }
 
+.icon-coral {
+    background-color: #F05D46;
+    mask: url('../icons/person-circle.svg') no-repeat center / contain;
+    -webkit-mask: url('../icons/person-circle.svg') no-repeat center / contain;
+}
+
 .badge-announce {
     background: rgba(240, 93, 70, 0.16);
     color: #F05D46;
