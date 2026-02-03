@@ -10,7 +10,7 @@
             <p>Réserve tes places et suis tes événements.</p>
         </div>
 
-        {{ form_start(registrationForm) }}
+        {{ form_start(registrationForm, {'attr': {'autocomplete': 'off'}}) }}
             {{ form_row(registrationForm.email) }}
             {{ form_row(registrationForm.plainPassword.first) }}
             {{ form_row(registrationForm.plainPassword.second) }}
