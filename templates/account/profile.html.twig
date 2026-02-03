@@ -17,20 +17,28 @@
         </div>
     </div>
 
+    {% set tab = activeTab|default('profile') %}
     <ul class="nav nav-tabs mks-tabs mb-4" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-profile-btn" data-bs-toggle="tab" data-bs-target="#tab-profile" type="button" role="tab" aria-controls="tab-profile" aria-selected="true">Profil</button>
+            <button class="nav-link {{ tab == 'profile' ? 'active' : '' }}" id="tab-profile-btn" data-bs-toggle="tab" data-bs-target="#tab-profile" type="button" role="tab" aria-controls="tab-profile" aria-selected="{{ tab == 'profile' ? 'true' : 'false' }}">Profil</button>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" href="{{ path('account_reservations') }}">Réservations</a>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-requests-btn" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button" role="tab" aria-controls="tab-requests" aria-selected="false">Demandes +6</button>
+            <button class="nav-link {{ tab == 'requests' ? 'active' : '' }}" id="tab-requests-btn" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button" role="tab" aria-controls="tab-requests" aria-selected="{{ tab == 'requests' ? 'true' : 'false' }}">Demandes +6</button>
         </li>
+        {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
+            <li class="nav-item ms-auto" role="presentation">
+                <a class="nav-link tab-announce {{ tab == 'events' ? 'active' : '' }}" id="tab-events-btn" href="{{ path('account_profile_events') }}" role="tab" aria-controls="tab-events" aria-selected="{{ tab == 'events' ? 'true' : 'false' }}">
+                    <img class="icon-svg icon-announce me-1" src="{{ asset('assets/icons/megaphone-fill.svg') }}" alt="" aria-hidden="true">Mes événements
+                </a>
+            </li>
+        {% endif %}
     </ul>
 
     <div class="tab-content">
-        <div class="tab-pane fade show active" id="tab-profile" role="tabpanel" aria-labelledby="tab-profile-btn">
+        <div class="tab-pane fade {{ tab == 'profile' ? 'show active' : '' }}" id="tab-profile" role="tabpanel" aria-labelledby="tab-profile-btn">
             <div class="admin-card">
                 {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
                     {{ form_errors(profileForm) }}
@@ -38,6 +46,18 @@
                         <img class="profile-avatar" src="{{ asset(app.user.profileImage ?? 'assets/images/avatar-default.svg') }}" alt="Avatar">
                         <div>
                             <div class="fw-semibold">Bonjour, {{ app.user.username }}</div>
+                            <div class="badge-group mt-1">
+                                {% if is_granted('ROLE_ANNOUNCER') %}
+                                    <span class="badge-pill badge-announce d-inline-flex align-items-center gap-1">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/megaphone.svg') }}" alt="" aria-hidden="true">Annonceur
+                                    </span>
+                                {% endif %}
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <span class="badge-pill badge-success d-inline-flex align-items-center gap-1">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/shield-check.svg') }}" alt="" aria-hidden="true">Admin
+                                    </span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <div class="row g-3">
@@ -69,7 +89,7 @@
             {% endif %}
         </div>
 
-        <div class="tab-pane fade" id="tab-requests" role="tabpanel" aria-labelledby="tab-requests-btn">
+        <div class="tab-pane fade {{ tab == 'requests' ? 'show active' : '' }}" id="tab-requests" role="tabpanel" aria-labelledby="tab-requests-btn">
             <div class="admin-card">
                 <h2 class="h6 mb-3">Mes demandes (+6 places)</h2>
                 <div class="table-responsive admin-table">
@@ -114,6 +134,19 @@
                 </div>
             </div>
         </div>
+
+        {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
+            <div class="tab-pane fade {{ tab == 'events' ? 'show active' : '' }}" id="tab-events" role="tabpanel" aria-labelledby="tab-events-btn">
+                <div class="admin-card">
+                    <h2 class="h6 mb-2">Mes événements</h2>
+                    <p class="text-muted mb-3">Accédez à l’espace de gestion pour créer et modifier vos événements.</p>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-primary btn-pill w-100" href="{{ path('account_event_new') }}">Créer un événement</a>
+                        <a class="btn btn-outline-primary btn-pill w-100" href="{{ path('admin_event_index') }}">Gérer mes événements</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

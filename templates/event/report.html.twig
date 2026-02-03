@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Signaler{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <a href="{{ path('event_index') }}">Événements</a>
+    <span class="mx-2">›</span>
+    <a href="{{ path('event_show', {slug: event.slug}) }}">{{ event.title }}</a>
+    <span class="mx-2">›</span>
+    <span>Signaler</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h4 mb-1">Signaler un événement</h1>
+            <p class="text-muted mb-0">Événement : {{ event.title }}</p>
+        </div>
+        <a class="btn btn-outline-primary btn-pill" href="{{ path('event_show', {slug: event.slug}) }}">Retour</a>
+    </div>
+
+    <div class="admin-card">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.reasons) }}
+            {{ form_row(form.description) }}
+            <button class="btn btn-primary btn-pill w-100" type="submit">Envoyer le signalement</button>
+        {{ form_end(form) }}
+    </div>
+</section>
+{% endblock %}

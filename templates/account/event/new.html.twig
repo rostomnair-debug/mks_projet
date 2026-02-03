@@ -5,7 +5,7 @@
 {% block breadcrumb %}
     <a href="{{ path('home') }}">Accueil</a>
     <span class="mx-2">›</span>
-    <a href="{{ path('admin_event_index') }}">{{ is_granted('ROLE_ADMIN') ? 'Admin événements' : 'Mes événements' }}</a>
+    <a href="{{ path('account_profile', {tab: 'events'}) }}">Mon profil</a>
     <span class="mx-2">›</span>
     <span>Nouvel événement</span>
 {% endblock %}
@@ -17,7 +17,7 @@
             <h1 class="h4 mb-1">Créer un événement</h1>
             <p class="text-muted mb-0">Renseignez les infos pratiques et publiez.</p>
         </div>
-        <a class="btn btn-outline-primary btn-pill" href="{{ path('admin_event_index') }}">Retour</a>
+        <a class="btn btn-outline-primary btn-pill" href="{{ path('account_profile', {tab: 'events'}) }}">Retour</a>
     </div>
 
     <div class="admin-card">

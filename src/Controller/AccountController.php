@@ -35,6 +35,15 @@ class AccountController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        $activeTab = (string) $request->query->get('tab', 'profile');
+        $allowedTabs = ['profile', 'requests', 'events'];
+        if (!in_array($activeTab, $allowedTabs, true)) {
+            $activeTab = 'profile';
+        }
+        if ($activeTab === 'events' && !$this->isGranted('ROLE_ANNOUNCER')) {
+            $activeTab = 'profile';
+        }
+
         $form = $this->createForm(AccountProfileType::class, $user);
         $form->handleRequest($request);
 
@@ -79,7 +88,15 @@ class AccountController extends AbstractController
         return $this->render('account/profile.html.twig', [
             'profileForm' => $form->createView(),
             'contactRequests' => $contactRequestRepository->findBy(['user' => $user], ['createdAt' => 'DESC']),
+            'activeTab' => $activeTab,
         ]);
+    }
+
+    #[Route('/account/profile/events', name: 'account_profile_events')]
+    #[IsGranted('ROLE_ANNOUNCER')]
+    public function profileEvents(): Response
+    {
+        return $this->redirectToRoute('account_profile', ['tab' => 'events']);
     }
 
     #[Route('/account/reservations', name: 'account_reservations')]

@@ -5,7 +5,7 @@
 {% block breadcrumb %}
     <a href="{{ path('home') }}">Accueil</a>
     <span class="mx-2">›</span>
-    <a href="{{ path('admin_event_index') }}">Admin événements</a>
+    <a href="{{ path('admin_event_index') }}">{{ is_granted('ROLE_ADMIN') ? 'Admin événements' : 'Mes événements' }}</a>
     <span class="mx-2">›</span>
     <span>Modifier</span>
 {% endblock %}

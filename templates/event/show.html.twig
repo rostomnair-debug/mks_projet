@@ -38,6 +38,7 @@
                 <ul class="meta-list">
                     <li><strong>Date</strong><br>{{ event.startAt|date('d/m/Y H:i') }}</li>
                     <li><strong>Lieu</strong><br>{{ event.address }}</li>
+                    <li><strong>Prix</strong><br>{{ event.priceCents == 0 ? 'Gratuit' : (event.priceCents / 100)|number_format(2, ',', ' ') ~ ' €' }}</li>
                     <li><strong>Places restantes</strong><br>{{ event.getRemainingPlaces() }}</li>
                 </ul>
                 {% if event.getRemainingPlaces() == 0 %}
@@ -65,6 +66,9 @@
                 {% else %}
                     <a class="btn btn-primary btn-pill w-100" href="{{ path('app_login', {target: path('event_show', {slug: event.slug}) ~ '#reserve'}) }}">Se connecter pour réserver</a>
                 {% endif %}
+                <div class="mt-3">
+                    <a class="btn btn-outline-danger btn-pill w-100" href="{{ path('event_report', {slug: event.slug}) }}">Signaler cet événement</a>
+                </div>
             </div>
         </div>
     </div>

@@ -1,20 +1,26 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MKS | Admin événements{% endblock %}
+{% set isAdmin = is_granted('ROLE_ADMIN') %}
+{% block title %}MKS | {{ isAdmin ? 'Admin événements' : 'Mes événements' }}{% endblock %}
 
 {% block breadcrumb %}
     <a href="{{ path('home') }}">Accueil</a>
-    <span class="mx-2">›</span>
-    <span>Admin</span>
-    <span class="mx-2">›</span>
-    <span>Événements</span>
+    {% if isAdmin %}
+        <span class="mx-2">›</span>
+        <span>Admin</span>
+        <span class="mx-2">›</span>
+        <span>Événements</span>
+    {% else %}
+        <span class="mx-2">›</span>
+        <span>Mes événements</span>
+    {% endif %}
 {% endblock %}
 
 {% block body %}
 <section class="admin-shell">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
-            <h1 class="h4 mb-1">Gestion des événements</h1>
+            <h1 class="h4 mb-1">{{ isAdmin ? 'Gestion des événements' : 'Mes événements' }}</h1>
             <p class="text-muted mb-0">Créez, modifiez et publiez vos événements.</p>
         </div>
     </div>
@@ -32,6 +38,9 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ path('admin_contact_index') }}">Demandes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('admin_report_index') }}">Signalements</a>
             </li>
         {% endif %}
     </ul>

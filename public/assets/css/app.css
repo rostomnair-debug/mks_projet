@@ -531,6 +531,23 @@ h6,
     color: var(--text);
 }
 
+.icon-svg {
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    vertical-align: -0.125rem;
+}
+
+.icon-announce {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.badge-announce {
+    background: rgba(240, 93, 70, 0.16);
+    color: #F05D46;
+}
+
 .event-detail {
     background: #ffffff;
     border-radius: 24px;
@@ -804,6 +821,20 @@ h6,
     color: #0073e6;
 }
 
+.mks-tabs .nav-link.tab-announce {
+    background-color: #F05D46;
+    color:var(--bg) ;
+}
+
+.mks-tabs .nav-link.tab-announce:hover {
+    color: #F05D46;
+}
+
+.mks-tabs .nav-link.tab-announce.active {
+    color: #F05D46;
+    border-color: rgba(240, 93, 70, 0.35);
+}
+
 .mks-tabs .nav-link.active {
     background: #ffffff;
     border-color: #e5e7eb;
@@ -843,6 +874,10 @@ h6,
 }
 
 @media (max-width: 991px) {
+    .brand-text {
+        display: none;
+    }
+
     .header-search {
         width: 100%;
         margin-top: 1rem;
