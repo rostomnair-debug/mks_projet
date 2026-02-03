@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | {{ form.requestedQuantity is defined ? 'Demande de groupe' : 'Contact' }}{% endblock %}
+{% block meta_description %}
+    {{ form.requestedQuantity is defined
+        ? "Demande de groupe (+6 places) pour un événement MKS."
+        : "Contactez l'équipe MKS pour toute question ou demande." }}
+{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            {% if form.requestedQuantity is defined %}
+                <h1>Demande de groupe</h1>
+                <p>Pour une réservation de groupe (+6 places) ou une demande spéciale.</p>
+            {% else %}
+                <h1>Contact MKS</h1>
+                <p>Une question, un partenariat, un problème technique ? Écrivez-nous.</p>
+            {% endif %}
+        </div>
+
+        {{ form_start(form) }}
+            {% if target %}
+                <input type="hidden" name="target" value="{{ target }}">
+            {% endif %}
+            {% if event %}
+                <input type="hidden" name="eventId" value="{{ event.id }}">
+            {% endif %}
+            {{ form_errors(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.email) }}
+            {% if form.requestedQuantity is defined %}
+                {{ form_row(form.requestedQuantity) }}
+            {% endif %}
+            {{ form_row(form.subject) }}
+            {{ form_row(form.message) }}
+            <button class="btn btn-primary btn-pill w-100" type="submit">Envoyer</button>
+        {{ form_end(form) }}
+    </div>
+</section>
+{% endblock %}

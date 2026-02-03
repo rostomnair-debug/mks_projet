@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Mes réservations{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <span>Mes réservations</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="mb-3">
+        <h1 class="h4 mb-1">Mon espace</h1>
+        <p class="text-muted mb-0">Gérez vos réservations et vos demandes.</p>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="{{ path('account_profile') }}">Profil</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-reservations-btn" data-bs-toggle="tab" data-bs-target="#tab-reservations" type="button" role="tab" aria-controls="tab-reservations" aria-selected="true">Réservations</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-requests-btn" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button" role="tab" aria-controls="tab-requests" aria-selected="false">Demandes +6</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="tab-reservations" role="tabpanel" aria-labelledby="tab-reservations-btn">
+            <div class="table-responsive admin-table">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Événement</th>
+                            <th>Date</th>
+                            <th>Places</th>
+                            <th>Statut</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ reservation.event.title }}</div>
+                                    <small class="text-muted">{{ reservation.event.venueName }}</small>
+                                </td>
+                                <td>{{ reservation.event.startAt|date('d/m/Y H:i') }}</td>
+                                <td>{{ reservation.quantity }}</td>
+                                <td>
+                                    {% if reservation.isCancelled %}
+                                        <span class="badge-pill badge-danger">Annulé</span>
+                                    {% else %}
+                                        <span class="badge-pill badge-success">Confirmé</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if not reservation.isCancelled and reservation.event.startAt > date() %}
+                                        <form method="post" action="{{ path('reservation_cancel', {id: reservation.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('cancel_reservation_' ~ reservation.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit">Annuler</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Aucune réservation pour le moment.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-requests" role="tabpanel" aria-labelledby="tab-requests-btn">
+            <div class="admin-card">
+                <h2 class="h6 mb-3">Mes demandes (+6 places)</h2>
+                <div class="table-responsive admin-table">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Sujet</th>
+                                <th>Statut</th>
+                                <th>Réponse</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in contactRequests %}
+                                <tr>
+                                    <td>{{ req.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td>{{ req.subject }}</td>
+                                    <td>
+                                        {% if req.status == 'answered' %}
+                                            <span class="badge-pill badge-success">Répondu</span>
+                                        {% elseif req.status == 'confirmed' %}
+                                            <span class="badge-pill badge-success">Confirmé</span>
+                                        {% else %}
+                                            <span class="badge-pill badge-warning">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if req.adminResponse %}
+                                            <span class="text-muted">{{ req.adminResponse }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Aucune demande.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

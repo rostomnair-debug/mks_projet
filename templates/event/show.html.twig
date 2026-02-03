@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | {{ event.title }}{% endblock %}
+{% block meta_description %}{{ event.description|slice(0, 150) }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <a href="{{ path('event_index') }}">Événements</a>
+    <span class="mx-2">›</span>
+    <span>{{ event.title }}</span>
+{% endblock %}
+
+{% block body %}
+<section class="event-detail">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="event-hero">
+                {% include 'partials/event_image.html.twig' with {event: event} %}
+            </div>
+            <div class="badge-group mt-3">
+                {% if event.priceCents == 0 %}
+                    <span class="badge-pill badge-success">Gratuit</span>
+                {% else %}
+                    <span class="badge-pill badge-warning">Payant</span>
+                {% endif %}
+                {% if event.getRemainingPlaces() == 0 %}
+                    <span class="badge-pill badge-danger">Complet</span>
+                {% endif %}
+            </div>
+            <h1 class="mt-3">{{ event.title }}</h1>
+            <p class="text-muted">{{ event.venueName }} · {{ event.district }}</p>
+            <p>{{ event.description }}</p>
+        </div>
+        <div class="col-lg-5">
+            <div class="info-panel" id="reserve">
+                <h2 class="h5">Infos pratiques</h2>
+                <ul class="meta-list">
+                    <li><strong>Date</strong><br>{{ event.startAt|date('d/m/Y H:i') }}</li>
+                    <li><strong>Lieu</strong><br>{{ event.address }}</li>
+                    <li><strong>Places restantes</strong><br>{{ event.getRemainingPlaces() }}</li>
+                </ul>
+                {% if event.getRemainingPlaces() == 0 %}
+                    <button class="btn btn-secondary btn-pill w-100" disabled>Complet</button>
+                {% elseif app.user %}
+                    <div class="d-grid gap-2">
+                        <form method="post" action="{{ path('reservation_create', {id: event.id}) }}" class="d-grid gap-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
+                            {% set remainingForUser = 6 - userReserved %}
+                            {% set maxAllowed = event.getRemainingPlaces() %}
+                            {% if remainingForUser < maxAllowed %}
+                                {% set maxAllowed = remainingForUser %}
+                            {% endif %}
+                            <input class="form-control" type="number" name="quantity" min="1" max="{{ maxAllowed }}" value="1">
+                            <small class="text-muted">Limite: 6 places max par utilisateur sur cet événement.</small>
+                            <button class="btn btn-primary btn-pill w-100" type="submit">Réserver</button>
+                        </form>
+
+                        <form method="get" action="{{ path('contact') }}" class="d-grid gap-2">
+                            <input type="hidden" name="eventId" value="{{ event.id }}">
+                            <input type="hidden" name="target" value="{{ path('event_show', {slug: event.slug}) ~ '#reserve' }}">
+                            <button class="btn btn-outline-primary btn-pill w-100" type="submit">Besoin de +6 places ? Contactez-nous</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a class="btn btn-primary btn-pill w-100" href="{{ path('app_login', {target: path('event_show', {slug: event.slug}) ~ '#reserve'}) }}">Se connecter pour réserver</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-card mt-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div>
+                <h2 class="h6 mb-1">Carte des points d'intérêt</h2>
+                <p class="text-muted mb-0">Autour du lieu de l'événement.</p>
+            </div>
+        </div>
+        <div id="event-map"
+             class="mks-map"
+             data-lat="{{ event.latitude ?? '' }}"
+             data-lng="{{ event.longitude ?? '' }}"
+             data-title="{{ event.title|e('html_attr') }}"
+             data-venue="{{ event.venueName|e('html_attr') }}">
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        (function () {
+            const mapEl = document.getElementById('event-map');
+            if (!mapEl || !window.L) {
+                return;
+            }
+
+            const lat = parseFloat(mapEl.dataset.lat);
+            const lng = parseFloat(mapEl.dataset.lng);
+            const escapeHtml = (value) => String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            const title = escapeHtml(mapEl.dataset.title || 'Événement');
+            const venue = escapeHtml(mapEl.dataset.venue || '');
+            const hasCoords = !Number.isNaN(lat) && !Number.isNaN(lng);
+            const center = hasCoords ? [lat, lng] : [43.2965, 5.3698];
+            const zoom = hasCoords ? 14 : 12;
+
+            const map = L.map('event-map').setView(center, zoom);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            if (hasCoords) {
+                L.marker([lat, lng]).addTo(map).bindPopup(`<strong>${title}</strong><br>${venue}`).openPopup();
+                L.circleMarker([lat, lng], {
+                    radius: 8,
+                    color: '#0B1D3F',
+                    weight: 2,
+                    fillColor: '#F05D46',
+                    fillOpacity: 0.9
+                }).addTo(map);
+            } else {
+                L.marker(center).addTo(map).bindPopup(`<strong>${title}</strong><br>Coordonnées non disponibles`).openPopup();
+            }
+        })();
+    </script>
+{% endblock %}

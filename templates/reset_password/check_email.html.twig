@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Email envoyé{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Vérifiez votre email</h1>
+            <p>Si un compte existe, un email vient d'être envoyé avec le lien de réinitialisation.</p>
+        </div>
+
+        <p class="text-muted">Le lien expirera dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+        <div class="auth-links">
+            <a href="{{ path('app_forgot_password_request') }}">Renvoyer le lien</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

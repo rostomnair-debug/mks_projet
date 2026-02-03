@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Agenda culturel Marseille{% endblock %}
+{% block meta_description %}Découvrez et réservez les événements culturels à Marseille.{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block body %}
+<div class="mosaic-nav mosaic-outside mb-3">
+    {% for category in mosaicCategories|slice(0, 5) %}
+        <a href="{{ path('event_index', {category: category.id}) }}">{{ category.name }}</a>
+    {% endfor %}
+    <a href="{{ path('event_index') }}" class="mosaic-more">Voir plus</a>
+</div>
+
+<section class="hero-card">
+    <div class="hero-grid">
+        <div class="hero-content">
+            <h1>Programmez vos escales culturelles à Marseille.</h1>
+            <p>Explorez les sorties à venir, filtrez par quartier ou catégorie, puis réservez en un clic.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-pill" href="#events">Événements à la une</a>
+                <a class="btn btn-outline-primary btn-pill" href="/events">Tous les événements</a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <strong>120+</strong>
+                    <span>événements à venir</span>
+                </div>
+                <div>
+                    <strong>18</strong>
+                    <span>quartiers couverts</span>
+                </div>
+                <div>
+                    <strong>35%</strong>
+                    <span>événements gratuits</span>
+                </div>
+            </div>
+        </div>
+        <div class="filters-card" id="filters">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h2 class="h5 mb-0">Rechercher un événement</h2>
+                <button class="btn btn-link text-decoration-none" type="button">Réinitialiser</button>
+            </div>
+            <form class="row g-3" method="get" action="{{ path('event_index') }}">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Mot-clé</label>
+                    <input class="form-control" type="text" name="q" placeholder="Concert, expo, atelier...">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Catégorie</label>
+                    <select class="form-select" name="category">
+                        <option value="">Toutes</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-6">
+                    <label class="form-label">Quartier</label>
+                    <input class="form-control" type="text" name="district" placeholder="Vieux-Port, Panier...">
+                </div>
+                <div class="col-6 col-md-6">
+                    <label class="form-label">Prix</label>
+                    <select class="form-select" name="price">
+                        <option value="">Tous</option>
+                        <option value="0-10">0 - 10 €</option>
+                        <option value="10-20">10 - 20 €</option>
+                        <option value="20-50">20 - 50 €</option>
+                        <option value="50+">50 € +</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Du</label>
+                    <input class="form-control" type="date" name="start_date">
+                </div>
+                <div class="col-12 col-md-6 d-flex align-items-end">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="free-home" name="free">
+                        <label class="form-check-label" for="free-home">Uniquement gratuit</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-primary w-100" type="submit">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="admin-card mt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h2 class="h6 mb-1">Carte des points d'intérêt</h2>
+            <p class="text-muted mb-0">Explorez les lieux culturels à Marseille.</p>
+        </div>
+    </div>
+    <div id="home-map" class="mks-map"></div>
+</section>
+
+<section class="events-section mt-2" id="events">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+        <h2 class="mb-1">Événements à la une</h2>
+        <p class="text-muted mb-0">Sélection des prochaines dates à Marseille.</p>
+        </div>
+        <span class="text-muted">Mise à jour quotidienne</span>
+    </div>
+
+    {% if events is empty %}
+        <div class="card border-0 shadow-sm p-5 text-center">Aucun événement publié pour le moment.</div>
+    {% else %}
+        <div class="row g-4">
+            {% for event in events %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="event-card">
+                        {% include 'partials/event_image.html.twig' with {event: event} %}
+                        <div class="event-card-body">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                <div class="badge-group">
+                                    {% if event.priceCents == 0 %}
+                                        <span class="badge-pill badge-success">Gratuit</span>
+                                    {% else %}
+                                        <span class="badge-pill badge-warning">Payant</span>
+                                    {% endif %}
+                                    {% if event.getRemainingPlaces() == 0 %}
+                                        <span class="badge-pill badge-danger">Complet</span>
+                                    {% endif %}
+                                </div>
+                                <span class="price-tag">{{ event.priceCents == 0 ? 'Gratuit' : (event.priceCents / 100)|number_format(2, ',', ' ') ~ ' €' }}</span>
+                            </div>
+                            <h3>{{ event.title }}</h3>
+                            <p class="text-muted">{{ event.venueName }} · {{ event.district }}</p>
+                            <div class="event-meta">
+                                <span>{{ event.startAt|date('d/m/Y H:i') }}</span>
+                                <span class="dot-sep">•</span>
+                                <span>{{ event.getRemainingPlaces() }} places</span>
+                            </div>
+                            <a class="btn btn-primary btn-pill w-100" href="{{ path('event_show', {slug: event.slug}) }}">Voir détails</a>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        (function () {
+            const mapEl = document.getElementById('home-map');
+            if (!mapEl || !window.L) {
+                return;
+            }
+
+            const map = L.map('home-map').setView([43.2965, 5.3698], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            fetch('{{ path('api_events_map') }}')
+                .then((response) => response.json())
+                .then((points) => {
+                    if (!Array.isArray(points) || points.length === 0) {
+                        return;
+                    }
+                    const escapeHtml = (value) => String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                    const bounds = [];
+                    points.forEach((point) => {
+                        if (!point.latitude || !point.longitude) {
+                            return;
+                        }
+                        const marker = L.marker([point.latitude, point.longitude]).addTo(map);
+                        marker.bindPopup(`<strong>${escapeHtml(point.title)}</strong><br>${escapeHtml(point.venue)}`);
+                        bounds.push([point.latitude, point.longitude]);
+                    });
+                    if (bounds.length > 0) {
+                        map.fitBounds(bounds, { padding: [20, 20] });
+                    }
+                })
+                .catch(() => {});
+        })();
+    </script>
+{% endblock %}

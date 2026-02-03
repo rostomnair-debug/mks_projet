@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Nouvel événement{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <a href="{{ path('admin_event_index') }}">Admin événements</a>
+    <span class="mx-2">›</span>
+    <span>Nouvel événement</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h4 mb-1">Créer un événement</h1>
+            <p class="text-muted mb-0">Renseignez les infos pratiques et publiez.</p>
+        </div>
+        <a class="btn btn-outline-primary btn-pill" href="{{ path('admin_event_index') }}">Retour</a>
+    </div>
+
+    <div class="admin-card">
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            {% if not form.vars.valid %}
+                <div class="alert alert-danger">
+                    <strong>Champs à corriger :</strong>
+                    <ul class="mb-0">
+                        {% for child in form %}
+                            {% for error in child.vars.errors %}
+                                <li>{{ child.vars.label ?: child.vars.name }} : {{ error.message }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {{ form_row(form.title) }}
+            {{ form_row(form.description) }}
+            <div class="row g-3">
+                <div class="col-md-6">{{ form_row(form.startAt) }}</div>
+                <div class="col-md-6">{{ form_row(form.endAt) }}</div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">{{ form_row(form.venueName) }}</div>
+                <div class="col-md-6">{{ form_row(form.district) }}</div>
+            </div>
+            {{ form_row(form.address) }}
+            <div class="row g-3">
+                <div class="col-md-4">{{ form_row(form.capacity) }}</div>
+                <div class="col-md-4">{{ form_row(form.priceCents) }}</div>
+                <div class="col-md-4">{{ form_row(form.category) }}</div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">{{ form_row(form.latitude) }}</div>
+                <div class="col-md-6">{{ form_row(form.longitude) }}</div>
+            </div>
+            {{ form_row(form.imageFile) }}
+            {{ form_row(form.isPublished) }}
+            <button class="btn btn-primary btn-pill w-100" type="submit">Enregistrer</button>
+        {{ form_end(form) }}
+    </div>
+</section>
+{% endblock %}

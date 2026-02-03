@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Réinitialiser le mot de passe{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Nouveau mot de passe</h1>
+            <p>Choisissez un nouveau mot de passe pour votre compte.</p>
+        </div>
+
+        {{ form_start(resetForm) }}
+            {{ form_row(resetForm.plainPassword.first) }}
+            {{ form_row(resetForm.plainPassword.second) }}
+            <button class="btn btn-primary btn-pill w-100" type="submit">Mettre à jour</button>
+        {{ form_end(resetForm) }}
+    </div>
+</section>
+{% endblock %}

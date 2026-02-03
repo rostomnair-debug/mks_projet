@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Admin demandes{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <span>Admin</span>
+    <span class="mx-2">›</span>
+    <span>Demandes</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Demandes de réservation</h1>
+            <p class="text-muted mb-0">Messages envoyés depuis la page contact.</p>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_event_index') }}">Événements</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_user_index') }}">Utilisateurs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ path('admin_category_index') }}">Catégories</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ path('admin_contact_index') }}">Demandes</a>
+        </li>
+    </ul>
+
+    <div class="table-responsive admin-table">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Événement</th>
+                    <th>Places</th>
+                    <th>Sujet</th>
+                    <th>Statut</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                    <tr>
+                        <td>{{ req.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>{{ req.name }}</td>
+                        <td>{{ req.email }}</td>
+                        <td>{{ req.event ? req.event.title : '-' }}</td>
+                        <td>{{ req.requestedQuantity }}</td>
+                        <td>{{ req.subject }}</td>
+                        <td>
+                            {% if req.status == 'answered' %}
+                                <span class="badge-pill badge-success">Répondu</span>
+                            {% elseif req.status == 'confirmed' %}
+                                <span class="badge-pill badge-success">Confirmé</span>
+                            {% else %}
+                                <span class="badge-pill badge-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_contact_show', {id: req.id}) }}">Voir</a>
+                            {% if req.status != 'confirmed' and req.event and req.requestedQuantity > 0 %}
+                                <form class="d-inline" method="post" action="{{ path('admin_contact_confirm', {id: req.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('confirm_contact_' ~ req.id) }}">
+                                    <button class="btn btn-primary btn-sm" type="submit">Confirmer</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Aucune demande.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination.pages > 1 %}
+        <nav class="mt-4" aria-label="Pagination admin demandes">
+            <ul class="pagination mks-pagination justify-content-center">
+                <li class="page-item {{ pagination.page == 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_contact_index', query|merge({'page': pagination.page - 1})) }}">Précédent</a>
+                </li>
+                {% for p in 1..pagination.pages %}
+                    <li class="page-item {{ p == pagination.page ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path('admin_contact_index', query|merge({'page': p})) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {{ pagination.page == pagination.pages ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_contact_index', query|merge({'page': pagination.page + 1})) }}">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

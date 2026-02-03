@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Admin événements{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <span>Admin</span>
+    <span class="mx-2">›</span>
+    <span>Événements</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Gestion des événements</h1>
+            <p class="text-muted mb-0">Créez, modifiez et publiez vos événements.</p>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ path('admin_event_index') }}">Événements</a>
+        </li>
+        {% if is_granted('ROLE_ADMIN') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('admin_user_index') }}">Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('admin_category_index') }}">Catégories</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('admin_contact_index') }}">Demandes</a>
+            </li>
+        {% endif %}
+    </ul>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if is_granted('ROLE_ADMIN') %}
+            <form method="post" action="{{ path('admin_event_import_amp') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('import_amp') }}">
+                <button class="btn btn-outline-primary btn-pill" type="submit">Importer AMP</button>
+            </form>
+        {% endif %}
+        <a class="btn btn-primary btn-pill" href="{{ path('admin_event_new') }}">Nouvel événement</a>
+    </div>
+
+    <div class="table-responsive admin-table">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>
+                        <a class="text-decoration-none text-reset" href="{{ path('admin_event_index', {sort: 'title', dir: sort == 'title' and dir == 'ASC' ? 'desc' : 'asc'}) }}">
+                            Titre
+                            {% if sort == 'title' %}
+                                <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="text-decoration-none text-reset" href="{{ path('admin_event_index', {sort: 'date', dir: sort == 'date' and dir == 'ASC' ? 'desc' : 'asc'}) }}">
+                            Date
+                            {% if sort == 'date' %}
+                                <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="text-decoration-none text-reset" href="{{ path('admin_event_index', {sort: 'status', dir: sort == 'status' and dir == 'ASC' ? 'desc' : 'asc'}) }}">
+                            Statut
+                            {% if sort == 'status' %}
+                                <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="text-decoration-none text-reset" href="{{ path('admin_event_index', {sort: 'places', dir: sort == 'places' and dir == 'ASC' ? 'desc' : 'asc'}) }}">
+                            Places
+                            {% if sort == 'places' %}
+                                <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ event.title }}</div>
+                            <small class="text-muted">{{ event.category.name }}</small>
+                        </td>
+                        <td>{{ event.startAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            {% if event.isPublished %}
+                                <span class="badge-pill badge-success">Publié</span>
+                            {% else %}
+                                <span class="badge-pill badge-warning">Brouillon</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.getRemainingPlaces() }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier</a>
+                            <form class="d-inline" method="post" action="{{ path('admin_event_delete', {id: event.id}) }}" onsubmit="return confirm('Supprimer cet événement ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ event.id) }}">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Aucun événement.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination.pages > 1 %}
+        <nav class="mt-4" aria-label="Pagination admin événements">
+            <ul class="pagination mks-pagination justify-content-center">
+                <li class="page-item {{ pagination.page == 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_event_index', query|merge({'page': pagination.page - 1})) }}">Précédent</a>
+                </li>
+                {% for p in 1..pagination.pages %}
+                    <li class="page-item {{ p == pagination.page ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path('admin_event_index', query|merge({'page': p})) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {{ pagination.page == pagination.pages ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_event_index', query|merge({'page': pagination.page + 1})) }}">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

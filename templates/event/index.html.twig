@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Événements{% endblock %}
+{% block meta_description %}Liste des événements culturels à venir à Marseille.{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <span>Événements</span>
+{% endblock %}
+
+{% block body %}
+<section class="filters-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h5 mb-0">Trouver un événement</h1>
+        <a class="btn btn-link text-decoration-none" href="{{ path('event_index') }}">Réinitialiser</a>
+    </div>
+    <form class="row g-3" method="get">
+        <div class="col-12 col-md-4">
+            <label class="form-label">Mot-clé</label>
+            <input class="form-control" type="text" name="q" value="{{ filters.q }}" placeholder="Concert, expo, atelier...">
+        </div>
+        <div class="col-12 col-md-3">
+            <label class="form-label">Catégorie</label>
+            <select class="form-select" name="category">
+                <option value="">Toutes</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if filters.category == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label">Prix</label>
+            <select class="form-select" name="price">
+                <option value="">Tous</option>
+                <option value="0-10" {% if filters.price == '0-10' %}selected{% endif %}>0 - 10 €</option>
+                <option value="10-20" {% if filters.price == '10-20' %}selected{% endif %}>10 - 20 €</option>
+                <option value="20-50" {% if filters.price == '20-50' %}selected{% endif %}>20 - 50 €</option>
+                <option value="50+" {% if filters.price == '50+' %}selected{% endif %}>50 € +</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label">Du</label>
+            <input class="form-control" type="date" name="start_date" value="{{ filters.start_date }}">
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label">Au</label>
+            <input class="form-control" type="date" name="end_date" value="{{ filters.end_date }}">
+        </div>
+        <div class="col-12 col-md-2">
+            <label class="form-label">Quartier</label>
+            <input class="form-control" type="text" name="district" value="{{ filters.district }}" placeholder="Panier, Joliette...">
+        </div>
+        <div class="col-12 col-md-1 d-flex align-items-end">
+            <button class="btn btn-primary w-100" type="submit">OK</button>
+        </div>
+        <div class="col-12">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="1" id="free" name="free" {% if filters.free %}checked{% endif %}>
+                <label class="form-check-label" for="free">Uniquement gratuit</label>
+            </div>
+        </div>
+    </form>
+</section>
+
+<section class="events-section">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="section-title">Agenda culturel</h2>
+            <p class="section-subtitle">Sélection d'événements à venir.</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <form class="d-flex align-items-center gap-2" method="get">
+                {% for key, value in query %}
+                    {% if key != 'sort' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
+                <label class="form-label mb-0" for="sort">Trier</label>
+                <select class="form-select form-select-sm" id="sort" name="sort" onchange="this.form.submit()">
+                    <option value="">Date (0 → 9)</option>
+                    <option value="date_desc" {% if filters.sort == 'date_desc' %}selected{% endif %}>Date (9 → 0)</option>
+                    <option value="title_asc" {% if filters.sort == 'title_asc' %}selected{% endif %}>Titre (A → Z)</option>
+                    <option value="title_desc" {% if filters.sort == 'title_desc' %}selected{% endif %}>Titre (Z → A)</option>
+                    <option value="venue_asc" {% if filters.sort == 'venue_asc' %}selected{% endif %}>Lieu (A → Z)</option>
+                    <option value="venue_desc" {% if filters.sort == 'venue_desc' %}selected{% endif %}>Lieu (Z → A)</option>
+                </select>
+            </form>
+            <span class="text-muted">{{ pagination.total }} résultat(s)</span>
+        </div>
+    </div>
+
+    {% if events is empty %}
+        <div class="card border-0 shadow-sm p-5 text-center">Aucun événement trouvé.</div>
+    {% else %}
+        <div class="row g-4">
+            {% for event in events %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="event-card">
+                        {% include 'partials/event_image.html.twig' with {event: event} %}
+                        <div class="event-card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge-pill badge-info">{{ event.category.name }}</span>
+                                <span class="price-tag">{{ event.priceCents == 0 ? 'Gratuit' : (event.priceCents / 100)|number_format(2, ',', ' ') ~ ' €' }}</span>
+                            </div>
+                            <h3>{{ event.title }}</h3>
+                            <p class="text-muted">{{ event.venueName }} · {{ event.district }}</p>
+                            <div class="event-meta">
+                                <span>{{ event.startAt|date('d/m/Y H:i') }}</span>
+                                <span class="dot-sep">•</span>
+                                <span>{{ event.getRemainingPlaces() }} places</span>
+                            </div>
+                            <div class="btn-group">
+                                <a class="btn btn-outline-primary btn-pill" href="{{ path('event_show', {slug: event.slug}) }}">Infos</a>
+                                <a class="btn btn-primary btn-pill" href="{{ path('event_show', {slug: event.slug}) }}#reserve">Réserver</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if pagination.pages > 1 %}
+            <nav class="mt-4" aria-label="Pagination événements">
+                <ul class="pagination mks-pagination justify-content-center">
+                    <li class="page-item {{ pagination.page == 1 ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('event_index', query|merge({'page': pagination.page - 1})) }}">Précédent</a>
+                    </li>
+                    {% for p in 1..pagination.pages %}
+                        <li class="page-item {{ p == pagination.page ? 'active' : '' }}">
+                            <a class="page-link" href="{{ path('event_index', query|merge({'page': p})) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item {{ pagination.page == pagination.pages ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('event_index', query|merge({'page': pagination.page + 1})) }}">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

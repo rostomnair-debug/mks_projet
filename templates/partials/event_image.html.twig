@@ -1,0 +1,10 @@
+{% set link = link|default(path('event_show', {slug: event.slug})) %}
+<a class="event-image-link" href="{{ link }}">
+    {% if event.imagePath %}
+        <img src="{{ asset(event.imagePath) }}" alt="{{ event.title }}" class="{{ imgClass|default('') }}">
+    {% else %}
+        <div class="event-image-placeholder {{ imgClass|default('') }}">
+            <span>{{ event.title }}</span>
+        </div>
+    {% endif %}
+</a>

@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Inscription{% endblock %}
+
+{% block body %}
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Créer un compte</h1>
+            <p>Réserve tes places et suis tes événements.</p>
+        </div>
+
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.plainPassword.first) }}
+            {{ form_row(registrationForm.plainPassword.second) }}
+            <button class="btn btn-primary btn-pill w-100" type="submit">S'inscrire</button>
+        {{ form_end(registrationForm) }}
+
+        <div class="auth-links mt-3">
+            <a href="{{ path('app_login') }}">J'ai déjà un compte</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
