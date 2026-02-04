@@ -11,9 +11,11 @@ Plateforme de consultation et réservation d’événements culturels à Marseil
 ## Fonctionnalités principales
 - Consultation des événements (recherche, filtres, tri)
 - Détail événement + réservation
+- Favoris (wishlist) + onglet dédié
 - Demande de réservation groupe (+6 places)
 - Compte utilisateur (profil, photo, réservations)
-- Admin: CRUD événements, catégories, utilisateurs, demandes
+- Signalements (utilisateur → admin avec réponse)
+- Admin: CRUD événements, catégories, utilisateurs, demandes + signalements
 - Import AMP + carte des événements
 
 ## Parcours utilisateur (rapide)
@@ -29,13 +31,18 @@ Plateforme de consultation et réservation d’événements culturels à Marseil
 - Mailpit (optionnel, pour voir les emails)
 
 ## Configuration (.env.local)
-Exemple minimal:
+Exemple minimal (mot de passe simple):
 ```
 APP_ENV=dev
 APP_SECRET=change_me
 DATABASE_URL="mysql://admin:motdepasse@127.0.0.1:3306/mks?serverVersion=8.0"
 MAILER_DSN="smtp://127.0.0.1:1025"
 PEXELS_API_KEY="votre_cle"
+```
+
+Si votre mot de passe contient des caractères spéciaux, **encodez-le** :
+```
+DATABASE_URL="mysql://admin:%2Astudi%40aksis%2A@127.0.0.1:3306/mks?serverVersion=8.0&charset=utf8mb4"
 ```
 
 ## Démarrage rapide
@@ -47,11 +54,17 @@ php bin/console doctrine:fixtures:load --no-interaction
 symfony serve -d
 ```
 
+Après un `git pull`, pensez à relancer :
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
 ## Comptes & accès
 - Admin (exemple):
 ```bash
 php bin/console app:create-admin --email=admin@mail.com --password=987654321
 ```
+Le rôle **Annonceur** s’active depuis “Mon espace”.
 
 ## Import AMP (événements culturels)
 ```bash
@@ -67,6 +80,17 @@ php bin/console app:fill-event-images
 ## Mailpit (local)
 Lancer Mailpit puis ouvrir l’interface web pour lire les emails envoyés.
 DSN utilisé: `smtp://127.0.0.1:1025`
+
+## Emails
+Tous les emails sont unifiés via `templates/emails/base.html.twig`.
+
+## Favoris (wishlist)
+- Bouton ❤️ sur la liste et la page détail
+- Onglet “Favoris” dans “Mon espace”
+
+## Signalements
+- Les utilisateurs peuvent signaler un événement
+- L’admin peut répondre, conserver, bloquer ou supprimer
 
 ## Sécurité
 Voir `docs/securite.md`.
