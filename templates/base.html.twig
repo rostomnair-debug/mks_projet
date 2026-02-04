@@ -113,7 +113,35 @@
     </footer>
 </div>
 
+<div id="search-loader" class="search-loader" aria-hidden="true">
+    <div class="search-loader-card">
+        <div class="search-loader-spinner" aria-hidden="true"></div>
+        <span>Recherche en cours…</span>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    (function () {
+        const loader = document.getElementById('search-loader');
+        if (!loader) {
+            return;
+        }
+        document.querySelectorAll('form[data-search-loader]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                if (form.dataset.loading === '1') {
+                    return;
+                }
+                event.preventDefault();
+                form.dataset.loading = '1';
+                loader.classList.add('is-active');
+                setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+        });
+    })();
+</script>
 {% block javascripts %}{% endblock %}
 </body>
 </html>

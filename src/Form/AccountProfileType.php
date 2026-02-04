@@ -39,12 +39,12 @@ class AccountProfileType extends AbstractType
                 'label' => 'Email *',
             ])
             ->add('plainPassword', PasswordType::class, [
-                'label' => 'Nouveau mot de passe (optionnel)',
+                'label' => 'Modifier mot de passe (optionnel)',
                 'mapped' => false,
                 'required' => false,
             ])
             ->add('profileImageFile', FileType::class, [
-                'label' => 'Photo de profil',
+                'label' => 'Modifier photo de profil',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [

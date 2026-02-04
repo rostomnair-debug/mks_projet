@@ -42,7 +42,7 @@
                 <h2 class="h5 mb-0">Rechercher un événement</h2>
                 <button class="btn btn-link text-decoration-none" type="button">Réinitialiser</button>
             </div>
-            <form class="row g-3" method="get" action="{{ path('event_index') }}">
+            <form class="row g-3" method="get" action="{{ path('event_index') }}" data-search-loader>
                 <div class="col-12 col-md-6">
                     <label class="form-label">Mot-clé</label>
                     <input class="form-control" type="text" name="q" placeholder="Concert, expo, atelier...">
@@ -118,10 +118,10 @@
                         <div class="event-card-body">
                             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                 <div class="badge-group">
-                                    {% if event.priceCents == 0 %}
-                                        <span class="badge-pill badge-success">Gratuit</span>
+                                    {% if event.category %}
+                                        <span class="badge-pill badge-info">{{ event.category.name }}</span>
                                     {% else %}
-                                        <span class="badge-pill badge-warning">Payant</span>
+                                        <span class="badge-pill badge-muted">Sans catégorie</span>
                                     {% endif %}
                                     {% if event.getRemainingPlaces() == 0 %}
                                         <span class="badge-pill badge-danger">Complet</span>

@@ -19,10 +19,10 @@
                 {% include 'partials/event_image.html.twig' with {event: event} %}
             </div>
             <div class="badge-group mt-3">
-                {% if event.priceCents == 0 %}
-                    <span class="badge-pill badge-success">Gratuit</span>
+                {% if event.category %}
+                    <span class="badge-pill badge-info">{{ event.category.name }}</span>
                 {% else %}
-                    <span class="badge-pill badge-warning">Payant</span>
+                    <span class="badge-pill badge-muted">Sans catégorie</span>
                 {% endif %}
                 {% if event.getRemainingPlaces() == 0 %}
                     <span class="badge-pill badge-danger">Complet</span>

@@ -931,6 +931,60 @@ h6,
     border: 1px solid #e5e7eb;
 }
 
+.search-loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(244, 247, 251, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1050;
+}
+
+.search-loader.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.search-loader-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0b1d3f;
+    box-shadow: 0 16px 30px rgba(12, 26, 75, 0.12);
+    font-weight: 600;
+}
+
+.search-loader-spinner {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 3px solid #e5e7eb;
+    border-top-color: #0073e6;
+    animation: mks-spin 0.8s linear infinite;
+}
+
+@keyframes mks-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    border-color: #cfd6e4;
+    background: #cfd6e4;
+    color: #0b1d3f;
+}
+
 .leaflet-popup-content-wrapper {
     border-radius: 14px;
     box-shadow: 0 10px 24px rgba(11, 29, 63, 0.18);
