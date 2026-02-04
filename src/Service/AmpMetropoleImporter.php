@@ -16,6 +16,7 @@ class AmpMetropoleImporter
 {
     private const SOURCE = 'ampmetropole';
     private array $categoryCache = [];
+    private array $slugCache = [];
 
     public function __construct(
         private EventRepository $eventRepository,
@@ -77,6 +78,11 @@ class AmpMetropoleImporter
             $event->setAddress((string) ($row['adresse_postale'] ?? ''));
             $district = (string) ($row['code_postal'] ?? $row['commune'] ?? 'Marseille');
             $event->setDistrict($district);
+
+            $websiteUrl = (string) ($row['site_web'] ?? $row['url_poi'] ?? '');
+            if ($websiteUrl !== '') {
+                $event->setWebsiteUrl($websiteUrl);
+            }
 
             $latitude = isset($row['latitude']) ? (float) $row['latitude'] : null;
             $longitude = isset($row['longitude']) ? (float) $row['longitude'] : null;
@@ -184,15 +190,22 @@ class AmpMetropoleImporter
         $baseSlug = $this->slugger->slug($event->getTitle())->lower()->toString();
         $slug = $baseSlug;
         $suffix = 1;
+        $eventKey = $event->getId() ?? spl_object_id($event);
 
-        while ($existing = $this->eventRepository->findOneBy(['slug' => $slug])) {
-            if ($existing->getId() === $event->getId()) {
+        while (true) {
+            $existing = $this->eventRepository->findOneBy(['slug' => $slug]);
+            $isSame = $existing && $existing->getId() === $event->getId();
+            $isTakenInBatch = isset($this->slugCache[$slug]) && $this->slugCache[$slug] !== $eventKey;
+
+            if ((!$existing || $isSame) && !$isTakenInBatch) {
                 break;
             }
+
             $slug = $baseSlug . '-' . $suffix;
             $suffix++;
         }
 
         $event->setSlug($slug);
+        $this->slugCache[$slug] = $eventKey;
     }
 }
