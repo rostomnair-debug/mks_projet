@@ -15,7 +15,7 @@ class ReportType extends AbstractType
     {
         $builder
             ->add('reasons', ChoiceType::class, [
-                'label' => 'Raisons du signalement',
+                'label' => 'Raisons du signalement *',
                 'choices' => [
                     'Contenu offensant' => 'offensant',
                     'Événement terminé' => 'termine',

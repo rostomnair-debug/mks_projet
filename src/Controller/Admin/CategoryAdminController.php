@@ -19,16 +19,7 @@ class CategoryAdminController extends AbstractController
     #[Route('/', name: 'admin_category_index')]
     public function index(Request $request, CategoryRepository $categoryRepository): Response
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $pagination = $categoryRepository->findPaginated($page, 12);
-        $query = $request->query->all();
-        unset($query['page']);
-
-        return $this->render('admin/category/index.html.twig', [
-            'categories' => $pagination['items'],
-            'pagination' => $pagination,
-            'query' => $query,
-        ]);
+        return $this->redirectToRoute('admin_dashboard', ['tab' => 'categories'] + $request->query->all());
     }
 
     #[Route('/new', name: 'admin_category_new')]

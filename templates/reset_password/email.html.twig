@@ -1,6 +1,10 @@
-<h1>Réinitialiser votre mot de passe</h1>
-<p>Pour définir un nouveau mot de passe, cliquez sur le lien ci-dessous :</p>
-<p>
-    <a href="{{ url('app_reset_password', {token: resetToken.token}) }}">Réinitialiser mon mot de passe</a>
-</p>
-<p>Ce lien expire dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h2 style="margin: 0 0 12px; font-size: 20px; color: #0b1d3f;">Réinitialiser votre mot de passe</h2>
+    <p style="margin: 0 0 12px; color: #0b1d3f;">Pour définir un nouveau mot de passe, cliquez sur le lien ci-dessous :</p>
+    <p style="margin: 0 0 12px;">
+        <a href="{{ url('app_reset_password', {token: resetToken.token}) }}" style="display: inline-block; background: #0073e6; color: #ffffff; padding: 10px 16px; border-radius: 10px; text-decoration: none;">Réinitialiser mon mot de passe</a>
+    </p>
+    <p style="margin: 0; color: #0b1d3f;">Ce lien expire dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+{% endblock %}

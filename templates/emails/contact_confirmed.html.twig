@@ -1,0 +1,12 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h2 style="margin: 0 0 12px; font-size: 20px; color: #0b1d3f;">Votre demande est confirmée</h2>
+    <p style="margin: 0 0 12px; color: #0b1d3f;">
+        Votre demande pour l'événement <strong>{{ eventTitle }}</strong> a été confirmée.
+    </p>
+    {% if quantity %}
+        <p style="margin: 0 0 12px; color: #0b1d3f;"><strong>Places confirmées :</strong> {{ quantity }}</p>
+    {% endif %}
+    <p style="margin: 16px 0 0; color: #0b1d3f;">Merci pour votre confiance.<br>L’équipe MKS</p>
+{% endblock %}

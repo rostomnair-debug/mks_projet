@@ -23,13 +23,13 @@ class EventType extends AbstractType
     {
         $builder
             ->add('title', null, [
-                'label' => 'Titre',
+                'label' => 'Titre *',
             ])
             ->add('description', TextareaType::class, [
-                'label' => 'Description',
+                'label' => 'Description *',
             ])
             ->add('startAt', DateTimeType::class, [
-                'label' => 'Date et heure de début',
+                'label' => 'Date et heure de début *',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
             ])
@@ -40,38 +40,26 @@ class EventType extends AbstractType
                 'input' => 'datetime_immutable',
             ])
             ->add('venueName', null, [
-                'label' => 'Lieu',
+                'label' => 'Lieu *',
             ])
             ->add('address', null, [
-                'label' => 'Adresse',
+                'label' => 'Adresse *',
             ])
             ->add('district', null, [
-                'label' => 'Quartier',
+                'label' => 'Quartier *',
             ])
             ->add('capacity', IntegerType::class, [
-                'label' => 'Capacité',
+                'label' => 'Capacité *',
             ])
             ->add('priceCents', MoneyType::class, [
-                'label' => 'Prix',
+                'label' => 'Prix *',
                 'currency' => 'EUR',
                 'divisor' => 100,
             ])
             ->add('category', EntityType::class, [
-                'label' => 'Catégorie',
+                'label' => 'Catégorie *',
                 'class' => Category::class,
                 'choice_label' => 'name',
-            ])
-            ->add('latitude', NumberType::class, [
-                'label' => 'Latitude',
-                'required' => false,
-                'scale' => 6,
-                'html5' => true,
-            ])
-            ->add('longitude', NumberType::class, [
-                'label' => 'Longitude',
-                'required' => false,
-                'scale' => 6,
-                'html5' => true,
             ])
             ->add('imageFile', FileType::class, [
                 'label' => 'Image',
@@ -86,10 +74,12 @@ class EventType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('isPublished', CheckboxType::class, [
+            ->add('websiteUrl', null, [
+                'label' => 'Site internet',
                 'required' => false,
-                'label' => 'Publier',
-            ]);
+                'help' => 'Lien officiel de l’événement (optionnel).',
+            ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

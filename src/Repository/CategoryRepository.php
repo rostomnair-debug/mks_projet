@@ -49,4 +49,31 @@ class CategoryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param Category[] $categories
+     * @return array<int, int>
+     */
+    public function getEventCounts(array $categories): array
+    {
+        if ($categories === []) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.id AS id, COUNT(e.id) AS cnt')
+            ->leftJoin('c.events', 'e')
+            ->where('c IN (:categories)')
+            ->setParameter('categories', $categories)
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['id']] = (int) $row['cnt'];
+        }
+
+        return $counts;
+    }
 }

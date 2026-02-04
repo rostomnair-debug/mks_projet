@@ -69,11 +69,15 @@ class RegistrationController extends AbstractController
                 ->from(new Address('no-reply@mks.local', 'MKS'))
                 ->to($user->getEmail())
                 ->subject('Confirme ton compte MKS')
-                ->htmlTemplate('registration/confirmation_email.html.twig');
+                ->htmlTemplate('registration/confirmation_email.html.twig')
+                ->context([
+                    'logoUrl' => $request->getSchemeAndHttpHost() . '/assets/logos/mks-logo-main.svg',
+                ]);
 
             $target = (string) $request->request->get('target', '');
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user, $email, [
                 'target' => $target,
+                'logoUrl' => $request->getSchemeAndHttpHost() . '/assets/logos/mks-logo-main.svg',
             ]);
 
             $this->addFlash('success', 'Un email de confirmation a été envoyé.');

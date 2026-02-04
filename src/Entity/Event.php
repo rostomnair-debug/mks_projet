@@ -69,6 +69,10 @@ class Event
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $imagePath = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Le lien doit être une URL valide.')]
+    private ?string $websiteUrl = null;
+
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
@@ -263,6 +267,18 @@ class Event
     public function setImagePath(?string $imagePath): self
     {
         $this->imagePath = $imagePath;
+
+        return $this;
+    }
+
+    public function getWebsiteUrl(): ?string
+    {
+        return $this->websiteUrl;
+    }
+
+    public function setWebsiteUrl(?string $websiteUrl): self
+    {
+        $this->websiteUrl = $websiteUrl;
 
         return $this;
     }

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
+use App\Repository\FavoriteRepository;
 use App\Repository\ReservationRepository;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +16,12 @@ use Symfony\Component\Routing\Attribute\Route;
 class EventController extends AbstractController
 {
     #[Route('/events', name: 'event_index')]
-    public function index(Request $request, EventRepository $eventRepository, CategoryRepository $categoryRepository): Response
+    public function index(
+        Request $request,
+        EventRepository $eventRepository,
+        CategoryRepository $categoryRepository,
+        FavoriteRepository $favoriteRepository
+    ): Response
     {
         $filters = [
             'q' => trim((string) $request->query->get('q')),
@@ -34,17 +40,27 @@ class EventController extends AbstractController
         $query = $request->query->all();
         unset($query['page']);
 
+        $favoriteEventIds = [];
+        if ($this->getUser() instanceof \App\Entity\User) {
+            $favoriteEventIds = $favoriteRepository->findEventIdsForUser($this->getUser(), $pagination['items']);
+        }
+
         return $this->render('event/index.html.twig', [
             'events' => $pagination['items'],
             'categories' => $categoryRepository->findAll(),
             'filters' => $filters,
             'pagination' => $pagination,
             'query' => $query,
+            'favoriteEventIds' => $favoriteEventIds,
         ]);
     }
 
     #[Route('/events/{slug}', name: 'event_show')]
-    public function show(#[MapEntity(mapping: ['slug' => 'slug'])] Event $event, ReservationRepository $reservationRepository): Response
+    public function show(
+        #[MapEntity(mapping: ['slug' => 'slug'])] Event $event,
+        ReservationRepository $reservationRepository,
+        FavoriteRepository $favoriteRepository
+    ): Response
     {
         if (!$event->isPublished() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createNotFoundException();
@@ -55,9 +71,15 @@ class EventController extends AbstractController
             $userReserved = $reservationRepository->getReservedCountForUserEvent($this->getUser(), $event);
         }
 
+        $isFavorite = false;
+        if ($this->getUser() instanceof \App\Entity\User) {
+            $isFavorite = $favoriteRepository->isFavorite($this->getUser(), $event);
+        }
+
         return $this->render('event/show.html.twig', [
             'event' => $event,
             'userReserved' => $userReserved,
+            'isFavorite' => $isFavorite,
         ]);
     }
 }

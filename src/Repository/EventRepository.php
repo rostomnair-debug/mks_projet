@@ -80,8 +80,9 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('now', new \DateTimeImmutable());
 
         if (!empty($filters['q'])) {
-            $qb->andWhere('e.title LIKE :term OR e.description LIKE :term')
-                ->setParameter('term', '%' . $filters['q'] . '%');
+            $term = $this->normalizeSearchTerm((string) $filters['q']);
+            $qb->andWhere('LOWER(e.title) LIKE :term OR LOWER(e.description) LIKE :term OR LOWER(e.venueName) LIKE :term OR LOWER(e.district) LIKE :term')
+                ->setParameter('term', '%' . $term . '%');
         }
 
         if (!empty($filters['category'])) {
@@ -90,8 +91,9 @@ class EventRepository extends ServiceEntityRepository
         }
 
         if (!empty($filters['district'])) {
-            $qb->andWhere('e.district LIKE :district')
-                ->setParameter('district', '%' . $filters['district'] . '%');
+            $district = $this->normalizeSearchTerm((string) $filters['district']);
+            $qb->andWhere('LOWER(e.district) LIKE :district')
+                ->setParameter('district', '%' . $district . '%');
         }
 
         if (!empty($filters['start_date'])) {
@@ -168,6 +170,19 @@ class EventRepository extends ServiceEntityRepository
         ];
 
         return $map[$value] ?? null;
+    }
+
+    private function normalizeSearchTerm(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+        if (function_exists('mb_strtolower')) {
+            return mb_strtolower($value);
+        }
+
+        return strtolower($value);
     }
 
     public function findOneByExternal(string $source, string $externalId): ?Event

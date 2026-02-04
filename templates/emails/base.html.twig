@@ -1,0 +1,11 @@
+<div style="font-family: Arial, sans-serif; background: #f4f7fb; padding: 24px;">
+    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            {% if logoUrl is defined and logoUrl %}
+                <img src="{{ logoUrl }}" alt="MKS" style="width: 40px; height: 40px; object-fit: contain;">
+            {% endif %}
+            <span style="font-weight: 700; color: #0b1d3f; font-size: 18px;">MKS</span>
+        </div>
+        {% block content %}{% endblock %}
+    </div>
+</div>

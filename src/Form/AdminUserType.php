@@ -18,17 +18,17 @@ class AdminUserType extends AbstractType
     {
         $builder
             ->add('username', TextType::class, [
-                'label' => 'Pseudo',
+                'label' => 'Pseudo *',
             ])
             ->add('email', EmailType::class, [
-                'label' => 'Email',
+                'label' => 'Email *',
             ])
             ->add('isVerified', CheckboxType::class, [
                 'label' => 'Email vérifié',
                 'required' => false,
             ])
             ->add('role', ChoiceType::class, [
-                'label' => 'Rôle',
+                'label' => 'Rôle *',
                 'mapped' => false,
                 'choices' => [
                     'User' => 'ROLE_USER',

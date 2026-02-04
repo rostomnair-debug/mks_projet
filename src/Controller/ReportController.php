@@ -22,6 +22,8 @@ class ReportController extends AbstractController
     ): Response {
         $report = new Report();
         $report->setEvent($event);
+        $report->setEventTitle($event->getTitle());
+        $report->setEventSlug($event->getSlug());
         if ($this->getUser() instanceof \App\Entity\User) {
             $report->setUser($this->getUser());
         }

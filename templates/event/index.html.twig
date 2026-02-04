@@ -110,9 +110,22 @@
                                 <span class="dot-sep">•</span>
                                 <span>{{ event.getRemainingPlaces() }} places</span>
                             </div>
-                            <div class="btn-group">
+                            <div class="d-flex flex-wrap gap-2">
                                 <a class="btn btn-outline-primary btn-pill" href="{{ path('event_show', {slug: event.slug}) }}">Infos</a>
                                 <a class="btn btn-primary btn-pill" href="{{ path('event_show', {slug: event.slug}) }}#reserve">Réserver</a>
+                                {% if app.user %}
+                                    <form method="post" action="{{ path('favorite_toggle', {id: event.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('favorite_event_' ~ event.id) }}">
+                                        <input type="hidden" name="target" value="{{ app.request.requestUri }}">
+                                        <button class="btn btn-outline-primary btn-pill" type="submit" title="Favori" aria-label="Favori">
+                                            <img class="icon-svg" src="{{ asset(event.id in favoriteEventIds ? 'assets/icons/heart-fill.svg' : 'assets/icons/heart.svg') }}" alt="">
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a class="btn btn-outline-primary btn-pill" href="{{ path('app_login', {target: app.request.requestUri}) }}" title="Se connecter pour ajouter en favoris" aria-label="Favori">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/heart.svg') }}" alt="">
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </article>

@@ -18,7 +18,7 @@ class ResetPasswordRequestFormType extends AbstractType
                 new NotBlank(['message' => 'Veuillez saisir votre email.']),
                 new Email(['message' => 'Email invalide.']),
             ],
-            'label' => 'Email',
+            'label' => 'Email *',
         ]);
     }
 

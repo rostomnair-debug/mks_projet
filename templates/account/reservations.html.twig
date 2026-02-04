@@ -5,7 +5,9 @@
 {% block breadcrumb %}
     <a href="{{ path('home') }}">Accueil</a>
     <span class="mx-2">›</span>
-    <span>Mes réservations</span>
+    <a href="{{ path('account_profile') }}">Mon espace</a>
+    <span class="mx-2">›</span>
+    <span>Réservations</span>
 {% endblock %}
 
 {% block body %}
@@ -25,6 +27,13 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="tab-requests-btn" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button" role="tab" aria-controls="tab-requests" aria-selected="false">Demandes +6</button>
         </li>
+        {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
+            <li class="nav-item ms-auto" role="presentation">
+                <a class="nav-link tab-announce" href="{{ path('account_event_index') }}">
+                    <img class="icon-svg icon-announce me-1" src="{{ asset('assets/icons/megaphone-fill.svg') }}" alt="" aria-hidden="true">Mes annonces
+                </a>
+            </li>
+        {% endif %}
     </ul>
 
     <div class="tab-content">
@@ -60,7 +69,9 @@
                                     {% if not reservation.isCancelled and reservation.event.startAt > date() %}
                                         <form method="post" action="{{ path('reservation_cancel', {id: reservation.id}) }}">
                                             <input type="hidden" name="_token" value="{{ csrf_token('cancel_reservation_' ~ reservation.id) }}">
-                                            <button class="btn btn-outline-danger btn-sm" type="submit">Annuler</button>
+                                            <button class="btn btn-outline-danger btn-sm" type="submit" title="Annuler" aria-label="Annuler">
+                                                <img class="icon-svg" src="{{ asset('assets/icons/x-circle.svg') }}" alt="">
+                                            </button>
                                         </form>
                                     {% endif %}
                                 </td>

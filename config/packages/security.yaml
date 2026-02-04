@@ -47,9 +47,10 @@ security:
         - { path: ^/admin/users, roles: ROLE_ADMIN }
         - { path: ^/admin/categories, roles: ROLE_ADMIN }
         - { path: ^/admin/contacts, roles: ROLE_ADMIN }
-        - { path: ^/admin/events, roles: [ROLE_ADMIN, ROLE_ANNOUNCER] }
+        - { path: ^/admin/events, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/account, roles: ROLE_USER }
+        - { path: ^/account/events, roles: ROLE_ANNOUNCER }
         - { path: ^/reservations, roles: ROLE_USER }
 
 when@test:

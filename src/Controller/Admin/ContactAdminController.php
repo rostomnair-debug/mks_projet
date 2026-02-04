@@ -14,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -25,16 +25,7 @@ class ContactAdminController extends AbstractController
     #[Route('/', name: 'admin_contact_index')]
     public function index(Request $request, ContactRequestRepository $repository): Response
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $pagination = $repository->findPaginated($page, 12);
-        $query = $request->query->all();
-        unset($query['page']);
-
-        return $this->render('admin/contact/index.html.twig', [
-            'requests' => $pagination['items'],
-            'pagination' => $pagination,
-            'query' => $query,
-        ]);
+        return $this->redirectToRoute('admin_dashboard', ['tab' => 'contacts'] + $request->query->all());
     }
 
     #[Route('/{id}', name: 'admin_contact_show')]
@@ -52,11 +43,17 @@ class ContactAdminController extends AbstractController
             $contactRequest->setRespondedAt(new DateTimeImmutable());
             $entityManager->flush();
 
-            $email = (new Email())
+            $email = (new TemplatedEmail())
                 ->from('contact@mks.local')
                 ->to($contactRequest->getEmail())
                 ->subject('Re: ' . $contactRequest->getSubject())
-                ->text($contactRequest->getAdminResponse() ?? '');
+                ->htmlTemplate('emails/contact_response.html.twig')
+                ->context([
+                    'message' => $contactRequest->getAdminResponse(),
+                    'subject' => $contactRequest->getSubject(),
+                    'eventTitle' => $contactRequest->getEvent()?->getTitle(),
+                    'logoUrl' => $request->getSchemeAndHttpHost() . '/assets/logos/mks-logo-main.svg',
+                ]);
             $mailer->send($email);
 
             $this->addFlash('success', 'Réponse envoyée.');
@@ -121,11 +118,16 @@ class ContactAdminController extends AbstractController
             return $this->redirectToRoute('admin_contact_index');
         }
 
-        $email = (new Email())
+        $email = (new TemplatedEmail())
             ->from('contact@mks.local')
             ->to($contactRequest->getEmail())
             ->subject('Confirmation de votre demande')
-            ->text("Votre demande pour l'événement \"" . $event->getTitle() . "\" a été confirmée.\n\nMerci pour votre confiance.\nL'équipe MKS");
+            ->htmlTemplate('emails/contact_confirmed.html.twig')
+            ->context([
+                'eventTitle' => $event->getTitle(),
+                'quantity' => $quantity,
+                'logoUrl' => $request->getSchemeAndHttpHost() . '/assets/logos/mks-logo-main.svg',
+            ]);
         $mailer->send($email);
 
         $this->addFlash('success', 'Demande confirmée et réservation créée.');

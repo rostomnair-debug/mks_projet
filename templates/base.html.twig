@@ -33,7 +33,9 @@
                         <form method="get" action="{{ path('event_index') }}">
                             <div class="input-group">
                                 <input class="form-control" type="search" name="q" placeholder="Rechercher un événement">
-                                <button class="btn btn-primary" type="submit">Rechercher</button>
+                                <button class="btn btn-primary" type="submit" aria-label="Rechercher">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/search.svg') }}" alt="">
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -46,14 +48,27 @@
                                     <img class="nav-avatar" src="{{ asset(app.user.profileImage ?? 'assets/images/avatar-default.svg') }}" alt="Avatar">
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{{ path('account_profile') }}">Mon profil</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('account_profile', {tab: 'profile'}) }}">
+                                            <img class="icon-svg me-2" src="{{ asset('assets/icons/person-circle.svg') }}" alt="">
+                                            Mon espace
+                                        </a>
+                                    </li>
                                     {% if is_granted('ROLE_ADMIN') %}
-                                        <li><a class="dropdown-item" href="{{ path('admin_event_index') }}">Admin</a></li>
-                                    {% elseif is_granted('ROLE_ANNOUNCER') %}
-                                        <li><a class="dropdown-item" href="{{ path('admin_event_index') }}">Mes événements</a></li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('admin_dashboard', {tab: 'events'}) }}">
+                                                <img class="icon-svg me-2" src="{{ asset('assets/icons/shield-fill-check.svg') }}" alt="">
+                                                Espace Admin
+                                            </a>
+                                        </li>
                                     {% endif %}
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                            <img class="icon-svg me-2" src="{{ asset('assets/icons/x-circle.svg') }}" alt="">
+                                            Déconnexion
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         {% else %}

@@ -53,14 +53,13 @@
                 <div class="col-md-4">{{ form_row(form.priceCents) }}</div>
                 <div class="col-md-4">{{ form_row(form.category) }}</div>
             </div>
-            <div class="row g-3">
-                <div class="col-md-6">{{ form_row(form.latitude) }}</div>
-                <div class="col-md-6">{{ form_row(form.longitude) }}</div>
-            </div>
             {{ form_row(form.imageFile) }}
-            {{ form_row(form.isPublished) }}
-            <button class="btn btn-primary btn-pill w-100" type="submit">Enregistrer</button>
+            <div class="d-grid gap-2">
+                <button class="btn btn-coral btn-pill w-100" type="submit" name="save_draft" value="1">Enregistrer dans les brouillons</button>
+                <button class="btn btn-primary btn-pill w-100" type="submit" name="publish" value="1">Publier l'annonce</button>
+            </div>
         {{ form_end(form) }}
+        <p class="text-muted small mt-3">* champs obligatoires</p>
     </div>
 </section>
 {% endblock %}

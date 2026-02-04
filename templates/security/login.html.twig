@@ -54,12 +54,25 @@
                 {% if target %}
                     <input type="hidden" name="target" value="{{ target }}">
                 {% endif %}
+                {% if registrationForm.vars.submitted and not registrationForm.vars.valid %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(registrationForm) }}
+                    </div>
+                {% endif %}
                 {{ form_row(registrationForm.username) }}
                 {{ form_row(registrationForm.email) }}
                 {{ form_row(registrationForm.plainPassword.first) }}
                 {{ form_row(registrationForm.plainPassword.second) }}
+                {{ form_row(registrationForm.agreeTerms) }}
+                <div class="form-text mb-3">
+                    En cochant, vous acceptez les
+                    <a href="{{ path('legal_cgu') }}">CGU</a> et les
+                    <a href="{{ path('legal_mentions') }}">mentions légales</a>.
+                </div>
                 <button class="btn btn-secondary btn-pill w-100" type="submit">Créer mon compte</button>
             {{ form_end(registrationForm) }}
+
+            <p class="text-muted small mt-3">* champs obligatoires</p>
         </div>
     </div>
 </section>

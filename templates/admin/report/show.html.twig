@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Signalement{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <a href="{{ path('admin_dashboard', {tab: 'reports'}) }}">Admin signalements</a>
+    <span class="mx-2">›</span>
+    <span>Détail</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h4 mb-1">Signalement #{{ report.id }}</h1>
+            <p class="text-muted mb-0">Créé le {{ report.createdAt|date('d/m/Y H:i') }}</p>
+        </div>
+        <a class="btn btn-outline-primary btn-pill" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">Retour</a>
+    </div>
+
+    <div class="admin-card mb-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <h2 class="h6 mb-2">Événement concerné</h2>
+                <p class="mb-1 fw-semibold">{{ report.event ? report.event.title : (report.eventTitle ?: 'Événement supprimé') }}</p>
+                {% if report.event %}
+                    <p class="text-muted mb-2">{{ report.event.venueName }} · {{ report.event.startAt|date('d/m/Y H:i') }}</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ path('event_show', {slug: report.event.slug}) }}" target="_blank">Voir l'événement</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_event_edit', {id: report.event.id}) }}">Éditer</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-2">L'événement a été supprimé.</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h2 class="h6 mb-2">Signalement</h2>
+                <p class="mb-1"><strong>Utilisateur :</strong> {{ report.user ? report.user.email : 'Anonyme' }}</p>
+                <p class="mb-1"><strong>Raisons :</strong> {{ report.reasons is iterable ? report.reasons|join(', ') : '-' }}</p>
+                <p class="mb-2"><strong>Description :</strong> {{ report.description ?: '-' }}</p>
+                {% if report.actionTaken %}
+                    <p class="mb-2"><strong>Action :</strong> {{ report.actionTaken == 'blocked' ? 'Événement bloqué' : 'Événement supprimé' }}</p>
+                {% endif %}
+                {% if report.status == 'closed' %}
+                    <span class="badge-pill badge-success">Traité</span>
+                {% else %}
+                    <span class="badge-pill badge-warning">En attente</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="admin-card h-100">
+                <h2 class="h6 mb-3">Actions sur l'événement</h2>
+                {% if not report.event %}
+                    <div class="alert alert-warning">Action impossible : l'événement n'existe plus.</div>
+                {% endif %}
+                <form method="post" action="{{ path('admin_report_keep', {id: report.id}) }}" class="mb-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('report_keep_' ~ report.id) }}">
+                    <div class="mb-2">
+                        <label class="form-label">Message à l'utilisateur (optionnel)</label>
+                        <textarea class="form-control" name="keep_message" rows="4" placeholder="Ex: Après vérification, l'événement est maintenu."></textarea>
+                    </div>
+                    <button class="btn btn-outline-success w-100" type="submit" {% if not report.event %}disabled{% endif %}>Conserver l'événement</button>
+                </form>
+                <form method="post" action="{{ path('admin_report_block', {id: report.id}) }}" class="mb-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('report_block_' ~ report.id) }}">
+                    <button class="btn btn-outline-warning w-100" type="submit" {% if not report.event %}disabled{% endif %}>Bloquer l'événement (brouillon)</button>
+                </form>
+                <form method="post" action="{{ path('admin_report_delete_event', {id: report.id}) }}" onsubmit="return confirm('Supprimer définitivement cet événement ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('report_delete_' ~ report.id) }}">
+                    <button class="btn btn-outline-danger w-100" type="submit" {% if not report.event %}disabled{% endif %}>Supprimer l'événement</button>
+                </form>
+                <p class="text-muted small mt-3">La suppression supprime aussi les signalements liés.</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="admin-card h-100">
+                <h2 class="h6 mb-3">Répondre au signalement</h2>
+                {% if report.adminResponse %}
+                    <div class="alert alert-light border mb-3">
+                        <p class="mb-1"><strong>Dernière réponse :</strong></p>
+                        <p class="mb-1">{{ report.adminResponse }}</p>
+                        {% if report.respondedAt %}
+                            <small class="text-muted">Envoyée le {{ report.respondedAt|date('d/m/Y H:i') }}</small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if not report.user %}
+                    <div class="alert alert-warning">
+                        Aucun utilisateur associé : l'email ne sera pas envoyé.
+                    </div>
+                {% endif %}
+                <form method="post" action="{{ path('admin_report_respond', {id: report.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('report_respond_' ~ report.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label">Message à l'utilisateur *</label>
+                        <textarea class="form-control" name="response" rows="6" required></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-pill w-100" type="submit">Envoyer la réponse</button>
+                </form>
+                <p class="text-muted small mt-3">* champs obligatoires</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

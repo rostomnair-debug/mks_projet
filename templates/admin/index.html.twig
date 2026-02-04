@@ -1,0 +1,444 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MKS | Admin{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('home') }}">Accueil</a>
+    <span class="mx-2">›</span>
+    <span>Admin</span>
+{% endblock %}
+
+{% block body %}
+<section class="admin-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Espace admin</h1>
+            <p class="text-muted mb-0">Gérez le contenu et les utilisateurs.</p>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {{ tab == 'events' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'events'}) }}">Événements</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ tab == 'users' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'users'}) }}">Utilisateurs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ tab == 'categories' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'categories'}) }}">Catégories</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ tab == 'contacts' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'contacts'}) }}">Demandes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ tab == 'reports' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">Signalements</a>
+        </li>
+    </ul>
+
+    {% if tab == 'events' %}
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <form method="post" action="{{ path('admin_event_import_amp') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('import_amp') }}">
+                <button class="btn btn-outline-primary btn-pill" type="submit">Importer AMP</button>
+            </form>
+            <button class="btn btn-primary btn-pill" type="button" data-bs-toggle="modal" data-bs-target="#adminCreateEventModal">
+                Nouvel événement
+            </button>
+        </div>
+
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>
+                            <a class="text-decoration-none text-reset" href="{{ path('admin_dashboard', query|merge({tab: 'events', sort: 'title', dir: sort == 'title' and dir == 'ASC' ? 'desc' : 'asc'})) }}">
+                                Titre
+                                {% if sort == 'title' %}
+                                    <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none text-reset" href="{{ path('admin_dashboard', query|merge({tab: 'events', sort: 'date', dir: sort == 'date' and dir == 'ASC' ? 'desc' : 'asc'})) }}">
+                                Date
+                                {% if sort == 'date' %}
+                                    <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none text-reset" href="{{ path('admin_dashboard', query|merge({tab: 'events', sort: 'status', dir: sort == 'status' and dir == 'ASC' ? 'desc' : 'asc'})) }}">
+                                Statut
+                                {% if sort == 'status' %}
+                                    <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none text-reset" href="{{ path('admin_dashboard', query|merge({tab: 'events', sort: 'places', dir: sort == 'places' and dir == 'ASC' ? 'desc' : 'asc'})) }}">
+                                Places
+                                {% if sort == 'places' %}
+                                    <span class="ms-1">{{ dir == 'ASC' ? '▲' : '▼' }}</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ event.title }}</div>
+                                <small class="text-muted">{{ event.category.name }}</small>
+                            </td>
+                            <td>{{ event.startAt|date('d/m/Y H:i') }}</td>
+                            <td>
+                                {% if event.isPublished %}
+                                    <span class="badge-pill badge-success">Publié</span>
+                                {% else %}
+                                    <span class="badge-pill badge-warning">Brouillon</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ event.getRemainingPlaces() }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_event_edit', {id: event.id}) }}" title="Modifier" aria-label="Modifier">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/pencil-square.svg') }}" alt="">
+                                </a>
+                                <form class="d-inline" method="post" action="{{ path('admin_event_delete', {id: event.id}) }}" onsubmit="return confirm('Supprimer cet événement ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ event.id) }}">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit" title="Supprimer" aria-label="Supprimer">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/trash.svg') }}" alt="">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Aucun événement.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elseif tab == 'users' %}
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <button class="btn btn-primary btn-pill" type="button" data-bs-toggle="modal" data-bs-target="#adminCreateUserModal">
+                Créer un utilisateur
+            </button>
+        </div>
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Vérifié</th>
+                        <th>Créé le</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td class="fw-semibold">{{ user.email }}</td>
+                            <td>
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="badge-pill badge-info">Admin</span>
+                                {% elseif 'ROLE_ANNOUNCER' in user.roles %}
+                                    <span class="badge-pill badge-info">User annonceur</span>
+                                {% else %}
+                                    <span class="badge-pill badge-info">User</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.isVerified %}
+                                    <span class="badge-pill badge-success">Oui</span>
+                                {% else %}
+                                    <span class="badge-pill badge-warning">Non</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.createdAt|date('d/m/Y') }}</td>
+                            <td class="text-end">
+                                <form method="post" class="d-flex gap-2 justify-content-end" action="{{ path('admin_user_role', {id: user.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('user_role_' ~ user.id) }}">
+                                    <select class="form-select form-select-sm w-auto" name="role">
+                                        <option value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}selected{% endif %}>User</option>
+                                        <option value="ROLE_ANNOUNCER" {% if 'ROLE_ANNOUNCER' in user.roles %}selected{% endif %}>Annonceur</option>
+                                        <option value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}selected{% endif %}>Admin</option>
+                                    </select>
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">Modifier</button>
+                                </form>
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_user_edit', {id: user.id}) }}" title="Éditer" aria-label="Éditer">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/pencil-square.svg') }}" alt="">
+                                </a>
+                                <form class="d-inline" method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('user_delete_' ~ user.id) }}">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit" title="Supprimer" aria-label="Supprimer">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/trash.svg') }}" alt="">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Aucun utilisateur.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elseif tab == 'categories' %}
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <button class="btn btn-primary btn-pill" type="button" data-bs-toggle="modal" data-bs-target="#adminCreateCategoryModal">
+                Nouvelle catégorie
+            </button>
+        </div>
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Événements</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td>{{ categoryCounts[category.id]|default(0) }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_category_edit', {id: category.id}) }}" title="Modifier" aria-label="Modifier">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/pencil-square.svg') }}" alt="">
+                                </a>
+                                <form class="d-inline" method="post" action="{{ path('admin_category_delete', {id: category.id}) }}" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_category_' ~ category.id) }}">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit" title="Supprimer" aria-label="Supprimer">
+                                        <img class="icon-svg" src="{{ asset('assets/icons/trash.svg') }}" alt="">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Aucune catégorie.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elseif tab == 'contacts' %}
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Événement</th>
+                        <th>Places</th>
+                        <th>Sujet</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in contacts %}
+                        <tr>
+                            <td>{{ req.createdAt|date('d/m/Y H:i') }}</td>
+                            <td>{{ req.name }}</td>
+                            <td>{{ req.email }}</td>
+                            <td>{{ req.event ? req.event.title : '-' }}</td>
+                            <td>{{ req.requestedQuantity }}</td>
+                            <td>{{ req.subject }}</td>
+                            <td>
+                                {% if req.status == 'answered' %}
+                                    <span class="badge-pill badge-success">Répondu</span>
+                                {% elseif req.status == 'confirmed' %}
+                                    <span class="badge-pill badge-success">Confirmé</span>
+                                {% else %}
+                                    <span class="badge-pill badge-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_contact_show', {id: req.id}) }}" title="Voir" aria-label="Voir">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/eye.svg') }}" alt="">
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">Aucune demande.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elseif tab == 'reports' %}
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Événement</th>
+                        <th>Utilisateur</th>
+                        <th>Raisons</th>
+                        <th>Description</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                        <tr>
+                            <td>{{ report.createdAt|date('d/m/Y H:i') }}</td>
+                            <td>{{ report.event ? report.event.title : (report.eventTitle ?: '-') }}</td>
+                            <td>{{ report.user ? report.user.email : '-' }}</td>
+                            <td>{{ report.reasons is iterable ? report.reasons|join(', ') : '-' }}</td>
+                            <td>{{ report.description ?: '-' }}</td>
+                            <td>
+                                {% if report.status == 'closed' %}
+                                    <span class="badge-pill badge-success">Traité</span>
+                                {% else %}
+                                    <span class="badge-pill badge-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm" href="{{ path('admin_report_show', {id: report.id}) }}" title="Voir" aria-label="Voir">
+                                    <img class="icon-svg" src="{{ asset('assets/icons/eye.svg') }}" alt="">
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Aucun signalement.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {% if pagination and pagination.pages > 1 %}
+        <nav class="mt-4" aria-label="Pagination admin">
+            <ul class="pagination mks-pagination justify-content-center">
+                <li class="page-item {{ pagination.page == 1 ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_dashboard', query|merge({tab: tab, page: pagination.page - 1})) }}">Précédent</a>
+                </li>
+                {% for p in 1..pagination.pages %}
+                    <li class="page-item {{ p == pagination.page ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path('admin_dashboard', query|merge({tab: tab, page: p})) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {{ pagination.page == pagination.pages ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ path('admin_dashboard', query|merge({tab: tab, page: pagination.page + 1})) }}">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</section>
+
+{% if tab == 'events' %}
+    <div class="modal fade mks-modal" id="adminCreateEventModal" tabindex="-1" aria-labelledby="adminCreateEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="adminCreateEventModalLabel">Nouvel événement</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(eventForm, {'attr': {'enctype': 'multipart/form-data'}, 'action': path('admin_event_new')}) }}
+                        {{ form_row(eventForm.title) }}
+                        {{ form_row(eventForm.description) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form_row(eventForm.startAt) }}</div>
+                            <div class="col-md-6">{{ form_row(eventForm.endAt) }}</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form_row(eventForm.venueName) }}</div>
+                            <div class="col-md-6">{{ form_row(eventForm.district) }}</div>
+                        </div>
+                        {{ form_row(eventForm.address) }}
+                        <div class="row g-3">
+                            <div class="col-md-4">{{ form_row(eventForm.capacity) }}</div>
+                            <div class="col-md-4">{{ form_row(eventForm.priceCents) }}</div>
+                            <div class="col-md-4">{{ form_row(eventForm.category) }}</div>
+                        </div>
+                        {{ form_row(eventForm.imageFile) }}
+                        {{ form_row(eventForm.websiteUrl) }}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-coral btn-pill w-100" type="submit" name="save_draft" value="1">Enregistrer dans les brouillons</button>
+                            <button class="btn btn-primary btn-pill w-100" type="submit" name="publish" value="1">Publier l'annonce</button>
+                        </div>
+                    {{ form_end(eventForm) }}
+                    <p class="text-muted small mt-3">* champs obligatoires</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if tab == 'users' %}
+    <div class="modal fade mks-modal" id="adminCreateUserModal" tabindex="-1" aria-labelledby="adminCreateUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="adminCreateUserModalLabel">Créer un utilisateur</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ path('admin_user_index') }}" class="row g-3 align-items-end">
+                        <input type="hidden" name="_token" value="{{ csrf_token('user_create') }}">
+                        <input type="hidden" name="action" value="create">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Email *</label>
+                            <input class="form-control" type="email" name="email" required>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">Pseudo *</label>
+                            <input class="form-control" type="text" name="username" required>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">Mot de passe *</label>
+                            <input class="form-control" type="text" name="password" required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label">Rôle *</label>
+                            <select class="form-select" name="role">
+                                <option value="ROLE_USER">User</option>
+                                <option value="ROLE_ANNOUNCER">Annonceur</option>
+                                <option value="ROLE_ADMIN">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-12">
+                            <button class="btn btn-primary btn-pill w-100" type="submit">Créer</button>
+                        </div>
+                    </form>
+                    <p class="text-muted small mt-3">* champs obligatoires</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if tab == 'categories' %}
+    <div class="modal fade mks-modal" id="adminCreateCategoryModal" tabindex="-1" aria-labelledby="adminCreateCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="adminCreateCategoryModalLabel">Nouvelle catégorie</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(categoryForm, {'action': path('admin_category_new')}) }}
+                        {{ form_row(categoryForm.name) }}
+                        <button class="btn btn-primary btn-pill w-100" type="submit">Enregistrer</button>
+                    {{ form_end(categoryForm) }}
+                    <p class="text-muted small mt-3">* champs obligatoires</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

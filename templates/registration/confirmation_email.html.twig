@@ -1,6 +1,10 @@
-<h1>Bienvenue sur Marseille Kulture Spot</h1>
-<p>Confirme ton email pour activer ton compte.</p>
-<p>
-    <a href="{{ signedUrl }}">Confirmer mon compte</a>
-</p>
-<p>Ce lien expire le {{ expiresAt|date('d/m/Y H:i') }}.</p>
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h2 style="margin: 0 0 12px; font-size: 20px; color: #0b1d3f;">Bienvenue sur MKS</h2>
+    <p style="margin: 0 0 12px; color: #0b1d3f;">Confirme ton email pour activer ton compte.</p>
+    <p style="margin: 0 0 12px;">
+        <a href="{{ signedUrl }}" style="display: inline-block; background: #0073e6; color: #ffffff; padding: 10px 16px; border-radius: 10px; text-decoration: none;">Confirmer mon compte</a>
+    </p>
+    <p style="margin: 0; color: #0b1d3f;">Ce lien expire le {{ expiresAt|date('d/m/Y H:i') }}.</p>
+{% endblock %}

@@ -39,32 +39,65 @@
                     <li><strong>Date</strong><br>{{ event.startAt|date('d/m/Y H:i') }}</li>
                     <li><strong>Lieu</strong><br>{{ event.address }}</li>
                     <li><strong>Prix</strong><br>{{ event.priceCents == 0 ? 'Gratuit' : (event.priceCents / 100)|number_format(2, ',', ' ') ~ ' €' }}</li>
+                    <li>
+                        <strong>Site</strong><br>
+                        {% if event.websiteUrl %}
+                            <a href="{{ event.websiteUrl }}" target="_blank" rel="noopener noreferrer">{{ event.websiteUrl }}</a>
+                        {% else %}
+                            <span class="text-muted">Pas de site web pour le moment.</span>
+                        {% endif %}
+                    </li>
                     <li><strong>Places restantes</strong><br>{{ event.getRemainingPlaces() }}</li>
                 </ul>
-                {% if event.getRemainingPlaces() == 0 %}
-                    <button class="btn btn-secondary btn-pill w-100" disabled>Complet</button>
-                {% elseif app.user %}
-                    <div class="d-grid gap-2">
-                        <form method="post" action="{{ path('reservation_create', {id: event.id}) }}" class="d-grid gap-2">
-                            <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
-                            {% set remainingForUser = 6 - userReserved %}
-                            {% set maxAllowed = event.getRemainingPlaces() %}
-                            {% if remainingForUser < maxAllowed %}
-                                {% set maxAllowed = remainingForUser %}
-                            {% endif %}
-                            <input class="form-control" type="number" name="quantity" min="1" max="{{ maxAllowed }}" value="1">
-                            <small class="text-muted">Limite: 6 places max par utilisateur sur cet événement.</small>
-                            <button class="btn btn-primary btn-pill w-100" type="submit">Réserver</button>
-                        </form>
+                {% if app.user %}
+                    <form id="favorite-form" method="post" action="{{ path('favorite_toggle', {id: event.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('favorite_event_' ~ event.id) }}">
+                        <input type="hidden" name="target" value="{{ path('event_show', {slug: event.slug}) }}">
+                    </form>
+                {% endif %}
 
-                        <form method="get" action="{{ path('contact') }}" class="d-grid gap-2">
-                            <input type="hidden" name="eventId" value="{{ event.id }}">
-                            <input type="hidden" name="target" value="{{ path('event_show', {slug: event.slug}) ~ '#reserve' }}">
-                            <button class="btn btn-outline-primary btn-pill w-100" type="submit">Besoin de +6 places ? Contactez-nous</button>
-                        </form>
+                {% if event.getRemainingPlaces() == 0 %}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-secondary btn-pill flex-grow-1" disabled>Complet</button>
+                        {% if app.user %}
+                            <button class="btn btn-outline-primary btn-pill btn-icon" type="submit" form="favorite-form" aria-label="Favori">
+                                <img class="icon-svg" src="{{ asset(isFavorite ? 'assets/icons/heart-fill.svg' : 'assets/icons/heart.svg') }}" alt="">
+                            </button>
+                        {% else %}
+                            <a class="btn btn-outline-primary btn-pill btn-icon" href="{{ path('app_login', {target: path('event_show', {slug: event.slug})}) }}" aria-label="Favori">
+                                <img class="icon-svg" src="{{ asset('assets/icons/heart.svg') }}" alt="">
+                            </a>
+                        {% endif %}
                     </div>
+                {% elseif app.user %}
+                    <form id="reserve-form" method="post" action="{{ path('reservation_create', {id: event.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
+                        {% set remainingForUser = 6 - userReserved %}
+                        {% set maxAllowed = event.getRemainingPlaces() %}
+                        {% if remainingForUser < maxAllowed %}
+                            {% set maxAllowed = remainingForUser %}
+                        {% endif %}
+                        <input class="form-control" type="number" name="quantity" min="1" max="{{ maxAllowed }}" value="1">
+                        <small class="text-muted">Limite: 6 places max par utilisateur sur cet événement.</small>
+                    </form>
+                    <div class="d-flex gap-2 mt-2">
+                        <button class="btn btn-primary btn-pill flex-grow-1" type="submit" form="reserve-form">Réserver</button>
+                        <button class="btn btn-outline-primary btn-pill btn-icon" type="submit" form="favorite-form" aria-label="Favori">
+                            <img class="icon-svg" src="{{ asset(isFavorite ? 'assets/icons/heart-fill.svg' : 'assets/icons/heart.svg') }}" alt="">
+                        </button>
+                    </div>
+                    <form method="get" action="{{ path('contact') }}" class="d-grid gap-2 mt-3">
+                        <input type="hidden" name="eventId" value="{{ event.id }}">
+                        <input type="hidden" name="target" value="{{ path('event_show', {slug: event.slug}) ~ '#reserve' }}">
+                        <button class="btn btn-outline-primary btn-pill w-100" type="submit">Besoin de +6 places ? Contactez-nous</button>
+                    </form>
                 {% else %}
-                    <a class="btn btn-primary btn-pill w-100" href="{{ path('app_login', {target: path('event_show', {slug: event.slug}) ~ '#reserve'}) }}">Se connecter pour réserver</a>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-primary btn-pill flex-grow-1" href="{{ path('app_login', {target: path('event_show', {slug: event.slug}) ~ '#reserve'}) }}">Se connecter pour réserver</a>
+                        <a class="btn btn-outline-primary btn-pill btn-icon" href="{{ path('app_login', {target: path('event_show', {slug: event.slug})}) }}" aria-label="Favori">
+                            <img class="icon-svg" src="{{ asset('assets/icons/heart.svg') }}" alt="">
+                        </a>
+                    </div>
                 {% endif %}
                 <div class="mt-3">
                     <a class="btn btn-outline-danger btn-pill w-100" href="{{ path('event_report', {slug: event.slug}) }}">Signaler cet événement</a>

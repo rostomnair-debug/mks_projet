@@ -16,8 +16,8 @@ class ChangePasswordFormType extends AbstractType
     {
         $builder->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
-            'first_options' => ['label' => 'Nouveau mot de passe'],
-            'second_options' => ['label' => 'Confirmer le mot de passe'],
+            'first_options' => ['label' => 'Nouveau mot de passe *'],
+            'second_options' => ['label' => 'Confirmer le mot de passe *'],
             'mapped' => false,
             'constraints' => [
                 new NotBlank(['message' => 'Veuillez saisir un mot de passe.']),

@@ -5,7 +5,7 @@
 {% block breadcrumb %}
     <a href="{{ path('home') }}">Accueil</a>
     <span class="mx-2">›</span>
-    <a href="{{ path('admin_category_index') }}">Admin catégories</a>
+    <a href="{{ path('admin_dashboard', {tab: 'categories'}) }}">Admin catégories</a>
     <span class="mx-2">›</span>
     <span>Modifier</span>
 {% endblock %}
@@ -17,7 +17,7 @@
             <h1 class="h4 mb-1">Modifier la catégorie</h1>
             <p class="text-muted mb-0">Mettez à jour le nom si besoin.</p>
         </div>
-        <a class="btn btn-outline-primary btn-pill" href="{{ path('admin_category_index') }}">Retour</a>
+        <a class="btn btn-outline-primary btn-pill" href="{{ path('admin_dashboard', {tab: 'categories'}) }}">Retour</a>
     </div>
 
     <div class="admin-card">
@@ -26,6 +26,7 @@
             {{ form_row(form.name) }}
             <button class="btn btn-primary btn-pill w-100" type="submit">Mettre à jour</button>
         {{ form_end(form) }}
+        <p class="text-muted small mt-3">* champs obligatoires</p>
     </div>
 </section>
 {% endblock %}

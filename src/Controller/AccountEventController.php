@@ -21,6 +21,12 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[IsGranted('ROLE_ANNOUNCER')]
 class AccountEventController extends AbstractController
 {
+    #[Route('/', name: 'account_event_index')]
+    public function index(Request $request, EventRepository $eventRepository): Response
+    {
+        return $this->redirectToRoute('account_profile', ['tab' => 'events']);
+    }
+
     #[Route('/new', name: 'account_event_new')]
     public function new(
         Request $request,
@@ -49,6 +55,7 @@ class AccountEventController extends AbstractController
                 ]);
             }
 
+            $event->setIsPublished($request->request->has('publish'));
             $this->setUniqueSlug($event, $eventRepository, $slugger);
             $event->setUpdatedAt(new DateTimeImmutable());
             $this->handleImageUpload($form->get('imageFile')->getData(), $event, $slugger, $uploadsDir);
@@ -64,6 +71,52 @@ class AccountEventController extends AbstractController
 
         return $this->render('account/event/new.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'account_event_edit')]
+    public function edit(
+        Request $request,
+        Event $event,
+        EventRepository $eventRepository,
+        EntityManagerInterface $entityManager,
+        SluggerInterface $slugger,
+        PexelsImageService $pexelsImageService,
+        #[Autowire('%app.event_uploads_dir%')] string $uploadsDir
+    ): Response {
+        if ($event->getOrganizer() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($event->getCapacity() < $event->getReservedCount()) {
+                $form->addError(new FormError('La capacité ne peut pas être inférieure aux places déjà réservées.'));
+
+                return $this->render('account/event/edit.html.twig', [
+                    'form' => $form->createView(),
+                    'event' => $event,
+                ]);
+            }
+
+            $event->setIsPublished($request->request->has('publish'));
+            $this->setUniqueSlug($event, $eventRepository, $slugger);
+            $event->setUpdatedAt(new DateTimeImmutable());
+            $this->handleImageUpload($form->get('imageFile')->getData(), $event, $slugger, $uploadsDir);
+            $pexelsImageService->attachImageForEvent($event);
+
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Événement mis à jour.');
+
+            return $this->redirectToRoute('account_event_index');
+        }
+
+        return $this->render('account/event/edit.html.twig', [
+            'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 

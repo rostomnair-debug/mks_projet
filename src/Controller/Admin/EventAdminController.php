@@ -24,33 +24,7 @@ class EventAdminController extends AbstractController
     #[Route('/', name: 'admin_event_index')]
     public function index(Request $request, EventRepository $eventRepository): Response
     {
-        $criteria = [];
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            $criteria['organizer'] = $this->getUser();
-        }
-
-        $sortKey = (string) $request->query->get('sort', 'date');
-        $dir = strtolower((string) $request->query->get('dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
-        $sortMap = [
-            'title' => 'title',
-            'date' => 'startAt',
-            'status' => 'isPublished',
-            'places' => 'capacity',
-        ];
-        $sortField = $sortMap[$sortKey] ?? 'startAt';
-
-        $page = max(1, (int) $request->query->get('page', 1));
-        $pagination = $eventRepository->searchAdminPaginated($criteria, $sortField, $dir, $page, 12);
-        $query = $request->query->all();
-        unset($query['page']);
-
-        return $this->render('admin/event/index.html.twig', [
-            'events' => $pagination['items'],
-            'pagination' => $pagination,
-            'query' => $query,
-            'sort' => $sortKey,
-            'dir' => $dir,
-        ]);
+        return $this->redirectToRoute('admin_dashboard', ['tab' => 'events'] + $request->query->all());
     }
 
     #[Route('/new', name: 'admin_event_new')]
@@ -81,6 +55,7 @@ class EventAdminController extends AbstractController
                 ]);
             }
 
+            $event->setIsPublished($request->request->has('publish'));
             $this->setUniqueSlug($event, $eventRepository, $slugger);
             $event->setUpdatedAt(new DateTimeImmutable());
             $this->handleImageUpload($form->get('imageFile')->getData(), $event, $slugger, $uploadsDir);
@@ -126,6 +101,7 @@ class EventAdminController extends AbstractController
                 ]);
             }
 
+            $event->setIsPublished($request->request->has('publish'));
             $this->setUniqueSlug($event, $eventRepository, $slugger);
             $event->setUpdatedAt(new DateTimeImmutable());
             $this->handleImageUpload($form->get('imageFile')->getData(), $event, $slugger, $uploadsDir);

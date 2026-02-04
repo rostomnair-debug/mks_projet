@@ -13,7 +13,7 @@ class ContactResponseType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('adminResponse', TextareaType::class, [
-            'label' => 'Réponse admin',
+            'label' => 'Réponse admin *',
             'attr' => ['rows' => 6],
         ]);
     }

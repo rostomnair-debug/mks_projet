@@ -79,10 +79,8 @@ class AmpMetropoleImporter
             $district = (string) ($row['code_postal'] ?? $row['commune'] ?? 'Marseille');
             $event->setDistrict($district);
 
-            $websiteUrl = (string) ($row['site_web'] ?? $row['url_poi'] ?? '');
-            if ($websiteUrl !== '') {
-                $event->setWebsiteUrl($websiteUrl);
-            }
+            $websiteUrl = (string) ($row['telephone'] ?? '');
+            $event->setWebsiteUrl($websiteUrl !== '' ? $websiteUrl : null);
 
             $latitude = isset($row['latitude']) ? (float) $row['latitude'] : null;
             $longitude = isset($row['longitude']) ? (float) $row['longitude'] : null;

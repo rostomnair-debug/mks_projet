@@ -27,7 +27,7 @@ class AccountProfileType extends AbstractType
                 'required' => false,
             ])
             ->add('username', TextType::class, [
-                'label' => 'Pseudo',
+                'label' => 'Pseudo *',
             ])
             ->add('birthDate', DateType::class, [
                 'label' => 'Date de naissance',
@@ -36,7 +36,7 @@ class AccountProfileType extends AbstractType
                 'input' => 'datetime_immutable',
             ])
             ->add('email', EmailType::class, [
-                'label' => 'Email',
+                'label' => 'Email *',
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Nouveau mot de passe (optionnel)',

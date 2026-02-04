@@ -3,42 +3,54 @@
 {% block title %}MKS | Mon profil{% endblock %}
 
 {% block breadcrumb %}
+    {% set currentTab = activeTab|default('profile') %}
+    {% set tabLabel = currentTab == 'reservations'
+        ? 'Réservations'
+        : (currentTab == 'requests'
+            ? 'Demandes'
+            : (currentTab == 'events'
+                ? 'Mes annonces'
+                : (currentTab == 'favorites' ? 'Favoris' : 'Profil'))) %}
     <a href="{{ path('home') }}">Accueil</a>
     <span class="mx-2">›</span>
-    <span>Mon profil</span>
+    <a href="{{ path('account_profile') }}">Mon espace</a>
+    <span class="mx-2">›</span>
+    <span>{{ tabLabel }}</span>
 {% endblock %}
 
 {% block body %}
 <section class="admin-shell">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
-            <h1 class="h4 mb-1">Mon profil</h1>
-            <p class="text-muted mb-0">Mettez à jour vos informations personnelles.</p>
+            <h1 class="h4 mb-1">Mon espace</h1>
+            <p class="text-muted mb-0">Gérez vos informations et vos activités.</p>
         </div>
     </div>
 
     {% set tab = activeTab|default('profile') %}
-    <ul class="nav nav-tabs mks-tabs mb-4" role="tablist">
+    <ul class="nav nav-tabs mks-tabs mb-4">
         <li class="nav-item" role="presentation">
-            <button class="nav-link {{ tab == 'profile' ? 'active' : '' }}" id="tab-profile-btn" data-bs-toggle="tab" data-bs-target="#tab-profile" type="button" role="tab" aria-controls="tab-profile" aria-selected="{{ tab == 'profile' ? 'true' : 'false' }}">Profil</button>
+            <a class="nav-link {{ tab == 'profile' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'profile'}) }}">Profil</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link" href="{{ path('account_reservations') }}">Réservations</a>
+            <a class="nav-link {{ tab == 'favorites' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'favorites'}) }}">Favoris</a>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link {{ tab == 'requests' ? 'active' : '' }}" id="tab-requests-btn" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button" role="tab" aria-controls="tab-requests" aria-selected="{{ tab == 'requests' ? 'true' : 'false' }}">Demandes +6</button>
+            <a class="nav-link {{ tab == 'reservations' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'reservations'}) }}">Réservations</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">Demandes spéciales</a>
         </li>
         {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
             <li class="nav-item ms-auto" role="presentation">
-                <a class="nav-link tab-announce {{ tab == 'events' ? 'active' : '' }}" id="tab-events-btn" href="{{ path('account_profile_events') }}" role="tab" aria-controls="tab-events" aria-selected="{{ tab == 'events' ? 'true' : 'false' }}">
-                    <img class="icon-svg icon-announce me-1" src="{{ asset('assets/icons/megaphone-fill.svg') }}" alt="" aria-hidden="true">Mes événements
+                <a class="nav-link tab-announce {{ tab == 'events' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'events'}) }}">
+                    <img class="icon-svg icon-announce me-1" src="{{ asset('assets/icons/megaphone-fill.svg') }}" alt="" aria-hidden="true">Mes annonces
                 </a>
             </li>
         {% endif %}
     </ul>
 
-    <div class="tab-content">
-        <div class="tab-pane fade {{ tab == 'profile' ? 'show active' : '' }}" id="tab-profile" role="tabpanel" aria-labelledby="tab-profile-btn">
+    {% if tab == 'profile' %}
             <div class="admin-card">
                 {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
                     {{ form_errors(profileForm) }}
@@ -75,6 +87,7 @@
                     {{ form_row(profileForm.plainPassword) }}
                     <button class="btn btn-primary btn-pill w-100" type="submit">Enregistrer</button>
                 {{ form_end(profileForm) }}
+                <p class="text-muted small mt-3">* champs obligatoires</p>
             </div>
 
             {% if not is_granted('ROLE_ANNOUNCER') and not is_granted('ROLE_ADMIN') %}
@@ -87,9 +100,99 @@
                     </form>
                 </div>
             {% endif %}
-        </div>
-
-        <div class="tab-pane fade {{ tab == 'requests' ? 'show active' : '' }}" id="tab-requests" role="tabpanel" aria-labelledby="tab-requests-btn">
+    {% elseif tab == 'favorites' %}
+            <div class="admin-card">
+                <h2 class="h6 mb-3">Mes favoris</h2>
+                <div class="table-responsive admin-table">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Événement</th>
+                                <th>Date</th>
+                                <th>Lieu</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for favorite in favorites %}
+                                {% set favEvent = favorite.event %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">{{ favEvent.title }}</div>
+                                        <small class="text-muted">{{ favEvent.category.name }}</small>
+                                    </td>
+                                    <td>{{ favEvent.startAt|date('d/m/Y H:i') }}</td>
+                                    <td>{{ favEvent.venueName }}</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-outline-primary btn-sm" href="{{ path('event_show', {slug: favEvent.slug}) }}" title="Voir" aria-label="Voir">
+                                            <img class="icon-svg" src="{{ asset('assets/icons/eye.svg') }}" alt="">
+                                        </a>
+                                        <form class="d-inline" method="post" action="{{ path('favorite_toggle', {id: favEvent.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('favorite_event_' ~ favEvent.id) }}">
+                                            <input type="hidden" name="target" value="{{ path('account_profile', {tab: 'favorites'}) }}">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit" title="Retirer" aria-label="Retirer">
+                                                <img class="icon-svg" src="{{ asset('assets/icons/heart-fill.svg') }}" alt="">
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Aucun favori pour le moment.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    {% elseif tab == 'reservations' %}
+            <div class="table-responsive admin-table">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Événement</th>
+                            <th>Date</th>
+                            <th>Places</th>
+                            <th>Statut</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ reservation.event.title }}</div>
+                                    <small class="text-muted">{{ reservation.event.venueName }}</small>
+                                </td>
+                                <td>{{ reservation.event.startAt|date('d/m/Y H:i') }}</td>
+                                <td>{{ reservation.quantity }}</td>
+                                <td>
+                                    {% if reservation.isCancelled %}
+                                        <span class="badge-pill badge-danger">Annulé</span>
+                                    {% else %}
+                                        <span class="badge-pill badge-success">Confirmé</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if not reservation.isCancelled and reservation.event.startAt > date() %}
+                                        <form method="post" action="{{ path('reservation_cancel', {id: reservation.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('cancel_reservation_' ~ reservation.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit" title="Annuler" aria-label="Annuler">
+                                                <img class="icon-svg" src="{{ asset('assets/icons/x-circle.svg') }}" alt="">
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Aucune réservation pour le moment.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    {% elseif tab == 'requests' %}
             <div class="admin-card">
                 <h2 class="h6 mb-3">Mes demandes (+6 places)</h2>
                 <div class="table-responsive admin-table">
@@ -133,20 +236,109 @@
                     </table>
                 </div>
             </div>
-        </div>
-
-        {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
-            <div class="tab-pane fade {{ tab == 'events' ? 'show active' : '' }}" id="tab-events" role="tabpanel" aria-labelledby="tab-events-btn">
-                <div class="admin-card">
-                    <h2 class="h6 mb-2">Mes événements</h2>
-                    <p class="text-muted mb-3">Accédez à l’espace de gestion pour créer et modifier vos événements.</p>
-                    <div class="d-grid gap-2">
-                        <a class="btn btn-primary btn-pill w-100" href="{{ path('account_event_new') }}">Créer un événement</a>
-                        <a class="btn btn-outline-primary btn-pill w-100" href="{{ path('admin_event_index') }}">Gérer mes événements</a>
+    {% elseif tab == 'events' and (is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN')) %}
+                <div class="admin-card mt-4 ">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h3 class="h6 mb-0">Mes annonces</h3>
+                        <button class="btn btn-outline-primary btn-sm btn-pill" type="button" data-bs-toggle="modal" data-bs-target="#createAnnonceModal">
+                            Créer une annonce
+                        </button>
+                    </div>
+                    <div class="table-responsive admin-table">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in announcerEvents %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ event.title }}</div>
+                                            <small class="text-muted">{{ event.category.name }}</small>
+                                        </td>
+                                        <td>{{ event.startAt|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if event.isPublished %}
+                                                <span class="badge-pill badge-success">Publié</span>
+                                            {% else %}
+                                                <span class="badge-pill badge-warning">Brouillon</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a class="btn btn-outline-primary btn-sm" href="{{ path('account_event_edit', {id: event.id}) }}" title="Modifier" aria-label="Modifier">
+                                                <img class="icon-svg" src="{{ asset('assets/icons/pencil-square.svg') }}" alt="">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Aucune annonce.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-    </div>
+    {% endif %}
 </section>
+
+{% if eventForm %}
+    <div class="modal fade mks-modal" id="createAnnonceModal" tabindex="-1" aria-labelledby="createAnnonceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="createAnnonceModalLabel">Créer une annonce</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(eventForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                        {% if not eventForm.vars.valid %}
+                            <div class="alert alert-danger">
+                                <strong>Champs à corriger :</strong>
+                                <ul class="mb-0">
+                                    {% for child in eventForm %}
+                                        {% for error in child.vars.errors %}
+                                            <li>{{ child.vars.label ?: child.vars.name }} : {{ error.message }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in eventForm.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        {{ form_row(eventForm.title) }}
+                        {{ form_row(eventForm.description) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form_row(eventForm.startAt) }}</div>
+                            <div class="col-md-6">{{ form_row(eventForm.endAt) }}</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form_row(eventForm.venueName) }}</div>
+                            <div class="col-md-6">{{ form_row(eventForm.district) }}</div>
+                        </div>
+                        {{ form_row(eventForm.address) }}
+                        <div class="row g-3">
+                            <div class="col-md-4">{{ form_row(eventForm.capacity) }}</div>
+                            <div class="col-md-4">{{ form_row(eventForm.priceCents) }}</div>
+                            <div class="col-md-4">{{ form_row(eventForm.category) }}</div>
+                        </div>
+                        {{ form_row(eventForm.imageFile) }}
+                        {{ form_row(eventForm.websiteUrl) }}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-coral btn-pill w-100" type="submit" name="save_draft" value="1">Enregistrer dans les brouillons</button>
+                            <button class="btn btn-primary btn-pill w-100" type="submit" name="publish" value="1">Publier l'annonce</button>
+                        </div>
+                    {{ form_end(eventForm) }}
+                    <p class="text-muted small mt-3">* champs obligatoires</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

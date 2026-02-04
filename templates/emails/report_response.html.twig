@@ -1,0 +1,21 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h2 style="margin: 0 0 12px; font-size: 20px; color: #0b1d3f;">Réponse à votre signalement</h2>
+    {% if eventTitle %}
+        <p style="margin: 0 0 12px; color: #0b1d3f;">
+            Concernant l'événement : <strong>{{ eventTitle }}</strong>
+        </p>
+    {% endif %}
+    {% if reportReasons %}
+        <p style="margin: 0 0 8px; color: #0b1d3f;"><strong>Raisons :</strong> {{ reportReasons }}</p>
+    {% endif %}
+    {% if reportMessage %}
+        <div style="border-left: 3px solid #e5e7eb; padding-left: 12px; margin: 16px 0; color: #0b1d3f;">
+            <p style="margin: 0 0 6px; font-weight: 600;">Votre signalement :</p>
+            <p style="margin: 0;">{{ reportMessage|nl2br }}</p>
+        </div>
+    {% endif %}
+    <p style="margin: 0 0 12px; color: #0b1d3f;">{{ message|nl2br }}</p>
+    <p style="margin: 16px 0 0; color: #0b1d3f;">Merci,<br>L’équipe MKS</p>
+{% endblock %}

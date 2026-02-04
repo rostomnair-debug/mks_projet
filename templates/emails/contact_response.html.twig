@@ -1,0 +1,13 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h2 style="margin: 0 0 12px; font-size: 20px; color: #0b1d3f;">Réponse à votre message</h2>
+    {% if eventTitle %}
+        <p style="margin: 0 0 8px; color: #0b1d3f;"><strong>Événement :</strong> {{ eventTitle }}</p>
+    {% endif %}
+    {% if subject %}
+        <p style="margin: 0 0 12px; color: #0b1d3f;"><strong>Sujet :</strong> {{ subject }}</p>
+    {% endif %}
+    <p style="margin: 0 0 12px; color: #0b1d3f;">{{ message|nl2br }}</p>
+    <p style="margin: 16px 0 0; color: #0b1d3f;">Merci,<br>L’équipe MKS</p>
+{% endblock %}

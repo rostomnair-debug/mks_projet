@@ -1,3 +1,17 @@
-This value should not be blank.: "Ce champ ne doit pas être vide."
-This value should not be null.: "Ce champ est obligatoire."
-This value is not valid.: "Valeur invalide."
+# Messages génériques du composant Validator
+This value should not be blank.: Ce champ est obligatoire.
+This value should not be null.: Ce champ est obligatoire.
+This value should be true.: Vous devez accepter cette condition.
+This value should be false.: La valeur est invalide.
+This value should be of type {{ type }}.: Type de valeur invalide.
+This value is not valid.: Cette valeur est invalide.
+This value is not a valid email address.: Adresse email invalide.
+This value is too short. It should have {{ limit }} characters or more.: Ce champ doit contenir au moins {{ limit }} caractères.
+This value is too long. It should have {{ limit }} characters or less.: Ce champ doit contenir au plus {{ limit }} caractères.
+This value should be greater than {{ compared_value }}.: La valeur doit être supérieure à {{ compared_value }}.
+This value should be greater than or equal to {{ compared_value }}.: La valeur doit être supérieure ou égale à {{ compared_value }}.
+This value should be less than {{ compared_value }}.: La valeur doit être inférieure à {{ compared_value }}.
+This value should be less than or equal to {{ compared_value }}.: La valeur doit être inférieure ou égale à {{ compared_value }}.
+This value should be positive.: La valeur doit être positive.
+This value should be positive or zero.: La valeur doit être positive ou égale à zéro.
+This value should be a valid URL.: L’URL n’est pas valide.

@@ -16,16 +16,16 @@ class ContactFormType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nom complet',
+                'label' => 'Nom complet *',
             ])
             ->add('email', EmailType::class, [
-                'label' => 'Email',
+                'label' => 'Email *',
             ])
             ->add('subject', TextType::class, [
-                'label' => 'Sujet',
+                'label' => 'Sujet *',
             ])
             ->add('message', TextareaType::class, [
-                'label' => 'Message',
+                'label' => 'Message *',
                 'attr' => ['rows' => 6],
             ]);
 

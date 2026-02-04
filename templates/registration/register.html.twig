@@ -11,11 +11,24 @@
         </div>
 
         {{ form_start(registrationForm, {'attr': {'autocomplete': 'off'}}) }}
+            {% if registrationForm.vars.submitted and not registrationForm.vars.valid %}
+                <div class="alert alert-danger">
+                    {{ form_errors(registrationForm) }}
+                </div>
+            {% endif %}
             {{ form_row(registrationForm.email) }}
             {{ form_row(registrationForm.plainPassword.first) }}
             {{ form_row(registrationForm.plainPassword.second) }}
+            {{ form_row(registrationForm.agreeTerms) }}
+            <div class="form-text mb-3">
+                En cochant, vous acceptez les
+                <a href="{{ path('legal_cgu') }}">CGU</a> et les
+                <a href="{{ path('legal_mentions') }}">mentions légales</a>.
+            </div>
             <button class="btn btn-primary btn-pill w-100" type="submit">S'inscrire</button>
         {{ form_end(registrationForm) }}
+
+        <p class="text-muted small mt-3">* champs obligatoires</p>
 
         <div class="auth-links mt-3">
             <a href="{{ path('app_login') }}">J'ai déjà un compte</a>
