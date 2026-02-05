@@ -13,7 +13,7 @@ Plateforme de consultation et réservation d’événements culturels à Marseil
 - Détail événement + réservation
 - Favoris (wishlist) + onglet dédié
 - Demande de réservation groupe (+6 places)
-- Compte utilisateur (profil, photo, réservations)
+- Compte utilisateur (profil, photo, réservations, suppression du compte)
 - Signalements (utilisateur → admin avec réponse)
 - Admin: CRUD événements, catégories, utilisateurs, demandes + signalements
 - Import AMP + carte des événements
@@ -22,6 +22,10 @@ Plateforme de consultation et réservation d’événements culturels à Marseil
 1. Je cherche un événement via les filtres.
 2. Je consulte la fiche et je réserve (ou je fais une demande groupe).
 3. Je retrouve mes réservations et l’état des demandes dans mon profil.
+
+## Suppression du compte
+Depuis “Mon espace > Profil”, l’utilisateur peut supprimer son compte.
+Si des annonces sont encore actives, la suppression est bloquée.
 
 ## Prérequis
 - PHP 8.2+
@@ -65,6 +69,10 @@ php bin/console doctrine:migrations:migrate
 php bin/console app:create-admin --email=admin@mail.com --password=987654321
 ```
 Le rôle **Annonceur** s’active depuis “Mon espace”.
+
+## Notifications
+- “Mon espace” affiche un badge quand une réponse arrive sur une demande (+6).
+- L’admin voit un badge “Demandes” et “Signalements” quand il y a des éléments en attente.
 
 ## Import AMP (événements culturels)
 ```bash
