@@ -1,0 +1,61 @@
+{% if pages > 1 %}
+    {% set start = page - 2 %}
+    {% set end = page + 2 %}
+    {% if start < 1 %}
+        {% set end = end + (1 - start) %}
+        {% set start = 1 %}
+    {% endif %}
+    {% if end > pages %}
+        {% set start = start - (end - pages) %}
+        {% set end = pages %}
+    {% endif %}
+    {% if start < 1 %}{% set start = 1 %}{% endif %}
+    {% if end - start < 4 %}
+        {% set end = start + 4 %}
+        {% if end > pages %}
+            {% set end = pages %}
+        {% endif %}
+    {% endif %}
+    {% if end - start < 4 %}
+        {% set start = end - 4 %}
+        {% if start < 1 %}
+            {% set start = 1 %}
+        {% endif %}
+    {% endif %}
+
+    <nav class="mt-4" aria-label="Pagination">
+        <ul class="pagination mks-pagination justify-content-center">
+            <li class="page-item {{ page == 1 ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, params|merge({'page': page - 1})) }}" aria-label="Précédent">«</a>
+            </li>
+
+            {% if start > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, params|merge({'page': 1})) }}">1</a>
+                </li>
+                {% if start > 2 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endif %}
+
+            {% for p in start..end %}
+                <li class="page-item {{ p == page ? 'active' : '' }}">
+                    <a class="page-link" href="{{ path(route, params|merge({'page': p})) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+
+            {% if end < pages %}
+                {% if end < pages - 1 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, params|merge({'page': pages})) }}">{{ pages }}</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item {{ page == pages ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, params|merge({'page': page + 1})) }}" aria-label="Suivant">»</a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}
