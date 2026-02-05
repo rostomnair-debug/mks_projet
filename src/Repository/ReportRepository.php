@@ -15,4 +15,14 @@ class ReportRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Report::class);
     }
+
+    public function countPending(): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.status = :status')
+            ->setParameter('status', Report::STATUS_PENDING)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

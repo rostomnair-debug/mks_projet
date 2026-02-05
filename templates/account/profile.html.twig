@@ -45,7 +45,14 @@
             <li><a class="dropdown-item {{ tab == 'profile' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'profile'}) }}">Profil</a></li>
             <li><a class="dropdown-item {{ tab == 'favorites' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'favorites'}) }}">Favoris</a></li>
             <li><a class="dropdown-item {{ tab == 'reservations' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'reservations'}) }}">Réservations</a></li>
-            <li><a class="dropdown-item {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">Demandes spéciales</a></li>
+            <li>
+                <a class="dropdown-item {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">
+                    Demandes spéciales
+                    {% if (requestNotifCount|default(0)) > 0 %}
+                        <span class="tab-badge">{{ requestNotifCount }}</span>
+                    {% endif %}
+                </a>
+            </li>
             {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
                 <li><a class="dropdown-item {{ tab == 'events' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'events'}) }}">Mes annonces</a></li>
             {% endif %}
@@ -63,7 +70,12 @@
             <a class="nav-link {{ tab == 'reservations' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'reservations'}) }}">Réservations</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">Demandes spéciales</a>
+            <a class="nav-link {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">
+                Demandes spéciales
+                {% if (requestNotifCount|default(0)) > 0 %}
+                    <span class="tab-badge">{{ requestNotifCount }}</span>
+                {% endif %}
+            </a>
         </li>
         {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
             <li class="nav-item ms-auto" role="presentation">
@@ -124,6 +136,15 @@
                     </form>
                 </div>
             {% endif %}
+
+            <div class="admin-card mt-4">
+                <h2 class="h6 mb-2 text-danger">Supprimer mon compte</h2>
+                <p class="text-muted mb-3">Cette action est définitive. Vos données personnelles seront supprimées.</p>
+                <form method="post" action="{{ path('account_delete') }}" onsubmit="return confirm('Supprimer définitivement votre compte ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account') }}">
+                    <button class="btn btn-outline-danger btn-pill w-100" type="submit">Supprimer mon compte</button>
+                </form>
+            </div>
     {% elseif tab == 'favorites' %}
             <div class="admin-card">
                 <h2 class="h6 mb-3">Mes favoris</h2>
@@ -299,6 +320,7 @@
                                     <th>Titre</th>
                                     <th>Date</th>
                                     <th>Statut</th>
+                                    <th>Réservations</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -317,6 +339,7 @@
                                                 <span class="badge-pill badge-warning">Brouillon</span>
                                             {% endif %}
                                         </td>
+                                        <td>{{ event.reservedCount }}/{{ event.capacity }}</td>
                                         <td class="text-end">
                                             <a class="btn btn-outline-primary btn-sm" href="{{ path('account_event_edit', {id: event.id}) }}" title="Modifier" aria-label="Modifier">
                                                 <img class="icon-svg" src="{{ asset('assets/icons/pencil-square.svg') }}" alt="">
@@ -325,7 +348,7 @@
                                     </tr>
                                 {% else %}
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Aucune annonce.</td>
+                                        <td colspan="5" class="text-center text-muted">Aucune annonce.</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

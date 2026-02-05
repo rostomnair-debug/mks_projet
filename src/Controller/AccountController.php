@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -57,6 +58,20 @@ class AccountController extends AbstractController
         if ($activeTab === 'events' && !$this->isGranted('ROLE_ANNOUNCER')) {
             $activeTab = 'profile';
         }
+
+        $session = $request->getSession();
+        $requestsSeenAt = null;
+        if ($session && $session->has('requests_seen_at')) {
+            $rawSeen = (string) $session->get('requests_seen_at');
+            if ($rawSeen !== '') {
+                try {
+                    $requestsSeenAt = new DateTimeImmutable($rawSeen);
+                } catch (\Exception $exception) {
+                    $requestsSeenAt = null;
+                }
+            }
+        }
+        $requestNotifCount = $contactRequestRepository->countRespondedSince($user, $requestsSeenAt);
 
         $form = $this->createForm(AccountProfileType::class, $user);
         $form->handleRequest($request);
@@ -143,6 +158,10 @@ class AccountController extends AbstractController
             $pagination = $reservationRepository->findByUserPaginated($user, $page, 10);
             $reservations = $pagination['items'];
         } elseif ($activeTab === 'requests') {
+            if ($session) {
+                $session->set('requests_seen_at', (new DateTimeImmutable())->format(DATE_ATOM));
+            }
+            $requestNotifCount = 0;
             $pagination = $contactRequestRepository->findByUserPaginated($user, $page, 10);
             $contactRequests = $pagination['items'];
         }
@@ -156,6 +175,7 @@ class AccountController extends AbstractController
             'activeTab' => $activeTab,
             'favorites' => $favorites,
             'pagination' => $pagination,
+            'requestNotifCount' => $requestNotifCount,
         ]);
     }
 
@@ -171,6 +191,62 @@ class AccountController extends AbstractController
     public function reservations(ReservationRepository $reservationRepository, ContactRequestRepository $contactRequestRepository): Response
     {
         return $this->redirectToRoute('account_profile', ['tab' => 'reservations']);
+    }
+
+    #[Route('/account/delete', name: 'account_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteAccount(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        EventRepository $eventRepository,
+        ReservationRepository $reservationRepository,
+        TokenStorageInterface $tokenStorage
+    ): Response {
+        if (!$this->isCsrfTokenValid('delete_account', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $organizedEventsCount = $eventRepository->count(['organizer' => $user]);
+        if ($organizedEventsCount > 0) {
+            $this->addFlash('error', 'Suppression impossible : vous avez des annonces en cours. Contactez l’équipe MKS.');
+
+            return $this->redirectToRoute('account_profile', ['tab' => 'profile']);
+        }
+
+        $reservations = $reservationRepository->findBy(['user' => $user]);
+        foreach ($reservations as $reservation) {
+            if (!$reservation->isCancelled()) {
+                $event = $reservation->getEvent();
+                $event->decrementReservedCount($reservation->getQuantity());
+            }
+            $entityManager->remove($reservation);
+        }
+
+        $entityManager->createQuery('DELETE FROM App\Entity\Favorite f WHERE f.user = :user')
+            ->setParameter('user', $user)
+            ->execute();
+        $entityManager->createQuery('DELETE FROM App\Entity\ContactRequest c WHERE c.user = :user')
+            ->setParameter('user', $user)
+            ->execute();
+        $entityManager->createQuery('DELETE FROM App\Entity\Report r WHERE r.user = :user')
+            ->setParameter('user', $user)
+            ->execute();
+        $entityManager->createQuery('DELETE FROM App\Entity\ResetPasswordRequest r WHERE r.user = :user')
+            ->setParameter('user', $user)
+            ->execute();
+
+        $entityManager->remove($user);
+        $entityManager->flush();
+
+        $tokenStorage->setToken(null);
+        $this->addFlash('success', 'Votre compte a été supprimé.');
+
+        return $this->redirectToRoute('home');
     }
 
     #[Route('/reservations/{id}/cancel', name: 'reservation_cancel', methods: ['POST'])]

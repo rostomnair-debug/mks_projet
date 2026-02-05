@@ -45,6 +45,8 @@ class AdminDashboardController extends AbstractController
             'tab' => $tab,
             'query' => $query,
             'page' => $page,
+            'contactPendingCount' => $contactRequestRepository->countPending(),
+            'reportPendingCount' => $reportRepository->countPending(),
             'events' => [],
             'users' => [],
             'categories' => [],

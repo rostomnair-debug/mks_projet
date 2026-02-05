@@ -29,7 +29,7 @@ class AmpMetropoleImporter
 
     public function import(User $organizer, int $limit = 20): array
     {
-        $data = $this->fetchData($this->apiUrl . '&limit=' . $limit);
+        $data = $this->fetchData($this->buildApiUrl($limit));
 
         $results = $data['results'] ?? [];
         $created = 0;
@@ -138,6 +138,22 @@ class AmpMetropoleImporter
         $data = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
 
         return is_array($data) ? $data : [];
+    }
+
+    private function buildApiUrl(int $limit): string
+    {
+        $url = $this->apiUrl;
+        $hasQuery = str_contains($url, '?');
+        $needsGlue = $hasQuery && !str_ends_with($url, '?') && !str_ends_with($url, '&');
+        $glue = $hasQuery ? ($needsGlue ? '&' : '') : '?';
+
+        $params = [];
+        if (!str_contains($url, 'sort=')) {
+            $params[] = 'sort=-datemaj';
+        }
+        $params[] = 'limit=' . $limit;
+
+        return $url . $glue . implode('&', $params);
     }
 
     private function parseDate(?string $value): ?DateTimeImmutable

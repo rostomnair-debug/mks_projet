@@ -34,8 +34,22 @@
             <li><a class="dropdown-item {{ tab == 'events' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'events'}) }}">Événements</a></li>
             <li><a class="dropdown-item {{ tab == 'users' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'users'}) }}">Utilisateurs</a></li>
             <li><a class="dropdown-item {{ tab == 'categories' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'categories'}) }}">Catégories</a></li>
-            <li><a class="dropdown-item {{ tab == 'contacts' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'contacts'}) }}">Demandes</a></li>
-            <li><a class="dropdown-item {{ tab == 'reports' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">Signalements</a></li>
+            <li>
+                <a class="dropdown-item {{ tab == 'contacts' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'contacts'}) }}">
+                    Demandes
+                    {% if contactPendingCount > 0 %}
+                        <span class="tab-badge">{{ contactPendingCount }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item {{ tab == 'reports' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">
+                    Signalements
+                    {% if reportPendingCount > 0 %}
+                        <span class="tab-badge">{{ reportPendingCount }}</span>
+                    {% endif %}
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -50,10 +64,20 @@
             <a class="nav-link {{ tab == 'categories' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'categories'}) }}">Catégories</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ tab == 'contacts' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'contacts'}) }}">Demandes</a>
+            <a class="nav-link {{ tab == 'contacts' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'contacts'}) }}">
+                Demandes
+                {% if contactPendingCount > 0 %}
+                    <span class="tab-badge">{{ contactPendingCount }}</span>
+                {% endif %}
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ tab == 'reports' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">Signalements</a>
+            <a class="nav-link {{ tab == 'reports' ? 'active' : '' }}" href="{{ path('admin_dashboard', {tab: 'reports'}) }}">
+                Signalements
+                {% if reportPendingCount > 0 %}
+                    <span class="tab-badge">{{ reportPendingCount }}</span>
+                {% endif %}
+            </a>
         </li>
     </ul>
 
