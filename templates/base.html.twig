@@ -103,7 +103,10 @@
 
     <footer class="site-footer">
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between gap-2">
-            <span>© {{ "now"|date("Y") }} Marseille Kulture Spot</span>
+            <div class="d-flex flex-column">
+                <span>© {{ "now"|date("Y") }} Marseille Kulture Spot</span>
+                <small class="text-muted">Données : AMP Métropole (DataTourisme) · Photos : Pexels</small>
+            </div>
             <div class="d-flex flex-wrap gap-3">
                 <a href="{{ path('contact') }}">Contact</a>
                 <a href="{{ path('legal_mentions') }}">Mentions légales</a>

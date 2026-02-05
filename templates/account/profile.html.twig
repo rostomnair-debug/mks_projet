@@ -28,7 +28,31 @@
     </div>
 
     {% set tab = activeTab|default('profile') %}
-    <ul class="nav nav-tabs mks-tabs mb-4">
+    {% set tabLabel = tab == 'favorites'
+        ? 'Favoris'
+        : (tab == 'reservations'
+            ? 'Réservations'
+            : (tab == 'requests'
+                ? 'Demandes spéciales'
+                : (tab == 'events' ? 'Mes annonces' : 'Profil'))) %}
+
+    <div class="dropdown d-md-none mb-3">
+        <button class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img class="icon-svg icon-dots" src="{{ asset('assets/icons/three-dots-vertical.svg') }}" alt="" aria-hidden="true">
+            <span>{{ tabLabel }}</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item {{ tab == 'profile' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'profile'}) }}">Profil</a></li>
+            <li><a class="dropdown-item {{ tab == 'favorites' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'favorites'}) }}">Favoris</a></li>
+            <li><a class="dropdown-item {{ tab == 'reservations' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'reservations'}) }}">Réservations</a></li>
+            <li><a class="dropdown-item {{ tab == 'requests' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'requests'}) }}">Demandes spéciales</a></li>
+            {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
+                <li><a class="dropdown-item {{ tab == 'events' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'events'}) }}">Mes annonces</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4 d-none d-md-flex">
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ tab == 'profile' ? 'active' : '' }}" href="{{ path('account_profile', {tab: 'profile'}) }}">Profil</a>
         </li>
@@ -142,9 +166,17 @@
                                 </tr>
                             {% endfor %}
                         </tbody>
-                    </table>
-                </div>
+                </table>
             </div>
+            {% if pagination %}
+                {% include 'partials/pagination.html.twig' with {
+                    route: 'account_profile',
+                    params: {tab: 'favorites'},
+                    page: pagination.page,
+                    pages: pagination.pages
+                } %}
+            {% endif %}
+        </div>
     {% elseif tab == 'reservations' %}
             <div class="table-responsive admin-table">
                 <table class="table align-middle">
@@ -192,6 +224,14 @@
                     </tbody>
                 </table>
             </div>
+            {% if pagination %}
+                {% include 'partials/pagination.html.twig' with {
+                    route: 'account_profile',
+                    params: {tab: 'reservations'},
+                    page: pagination.page,
+                    pages: pagination.pages
+                } %}
+            {% endif %}
     {% elseif tab == 'requests' %}
             <div class="admin-card">
                 <h2 class="h6 mb-3">Mes demandes (+6 places)</h2>
@@ -235,6 +275,14 @@
                         </tbody>
                     </table>
                 </div>
+                {% if pagination %}
+                    {% include 'partials/pagination.html.twig' with {
+                        route: 'account_profile',
+                        params: {tab: 'requests'},
+                        page: pagination.page,
+                        pages: pagination.pages
+                    } %}
+                {% endif %}
             </div>
     {% elseif tab == 'events' and (is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN')) %}
                 <div class="admin-card mt-4 ">
@@ -283,6 +331,14 @@
                             </tbody>
                         </table>
                     </div>
+                    {% if pagination %}
+                        {% include 'partials/pagination.html.twig' with {
+                            route: 'account_profile',
+                            params: {tab: 'events'},
+                            page: pagination.page,
+                            pages: pagination.pages
+                        } %}
+                    {% endif %}
                 </div>
     {% endif %}
 </section>

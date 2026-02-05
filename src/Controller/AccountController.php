@@ -99,13 +99,13 @@ class AccountController extends AbstractController
             return $this->redirectToRoute('account_profile');
         }
 
+        $page = max(1, (int) $request->query->get('page', 1));
+        $pagination = null;
         $announcerEvents = [];
         $eventFormView = null;
-        if ($this->isGranted('ROLE_ANNOUNCER')) {
-            $announcerEvents = $eventRepository->findBy(
-                ['organizer' => $user],
-                ['startAt' => 'DESC']
-            );
+        if ($this->isGranted('ROLE_ANNOUNCER') && $activeTab === 'events') {
+            $pagination = $eventRepository->findByOrganizerPaginated($user, $page, 10);
+            $announcerEvents = $pagination['items'];
 
             $event = new Event();
             $event->setOrganizer($user);
@@ -132,16 +132,30 @@ class AccountController extends AbstractController
             $eventFormView = $eventForm->createView();
         }
 
-        $favorites = $favoriteRepository->findByUserWithEvents($user);
+        $favorites = [];
+        $reservations = [];
+        $contactRequests = [];
+
+        if ($activeTab === 'favorites') {
+            $pagination = $favoriteRepository->findByUserPaginated($user, $page, 10);
+            $favorites = $pagination['items'];
+        } elseif ($activeTab === 'reservations') {
+            $pagination = $reservationRepository->findByUserPaginated($user, $page, 10);
+            $reservations = $pagination['items'];
+        } elseif ($activeTab === 'requests') {
+            $pagination = $contactRequestRepository->findByUserPaginated($user, $page, 10);
+            $contactRequests = $pagination['items'];
+        }
 
         return $this->render('account/profile.html.twig', [
             'profileForm' => $form->createView(),
-            'contactRequests' => $contactRequestRepository->findBy(['user' => $user], ['createdAt' => 'DESC']),
-            'reservations' => $reservationRepository->findBy(['user' => $user], ['createdAt' => 'DESC']),
+            'contactRequests' => $contactRequests,
+            'reservations' => $reservations,
             'announcerEvents' => $announcerEvents,
             'eventForm' => $eventFormView,
             'activeTab' => $activeTab,
             'favorites' => $favorites,
+            'pagination' => $pagination,
         ]);
     }
 

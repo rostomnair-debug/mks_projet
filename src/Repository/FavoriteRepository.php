@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Favorite;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -67,5 +68,34 @@ class FavoriteRepository extends ServiceEntityRepository
             ->orderBy('f.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findByUserPaginated(User $user, int $page, int $limit = 10): array
+    {
+        $page = max(1, $page);
+        $limit = max(1, $limit);
+
+        $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.event', 'e')
+            ->addSelect('e')
+            ->leftJoin('e.category', 'c')
+            ->addSelect('c')
+            ->where('f.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('f.createdAt', 'DESC');
+
+        $query = $qb->getQuery()
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($query);
+        $total = count($paginator);
+
+        return [
+            'items' => iterator_to_array($paginator),
+            'total' => $total,
+            'page' => $page,
+            'pages' => (int) ceil($total / $limit),
+        ];
     }
 }

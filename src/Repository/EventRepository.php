@@ -72,6 +72,33 @@ class EventRepository extends ServiceEntityRepository
         ];
     }
 
+    public function findByOrganizerPaginated($organizer, int $page, int $limit = 10): array
+    {
+        $page = max(1, $page);
+        $limit = max(1, $limit);
+
+        $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.category', 'c')
+            ->addSelect('c')
+            ->where('e.organizer = :organizer')
+            ->setParameter('organizer', $organizer)
+            ->orderBy('e.startAt', 'DESC');
+
+        $query = $qb->getQuery()
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($query);
+        $total = count($paginator);
+
+        return [
+            'items' => iterator_to_array($paginator),
+            'total' => $total,
+            'page' => $page,
+            'pages' => (int) ceil($total / $limit),
+        ];
+    }
+
     private function createPublicQueryBuilder(array $filters): QueryBuilder
     {
         $qb = $this->createQueryBuilder('e')

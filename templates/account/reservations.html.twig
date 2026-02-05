@@ -17,7 +17,22 @@
         <p class="text-muted mb-0">Gérez vos réservations et vos demandes.</p>
     </div>
 
-    <ul class="nav nav-tabs mks-tabs mb-4" role="tablist">
+    <div class="dropdown d-md-none mb-3">
+        <button class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img class="icon-svg icon-dots" src="{{ asset('assets/icons/three-dots-vertical.svg') }}" alt="" aria-hidden="true">
+            <span>Réservations</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ path('account_profile', {tab: 'profile'}) }}">Profil</a></li>
+            <li><button class="dropdown-item active" data-bs-toggle="tab" data-bs-target="#tab-reservations" type="button">Réservations</button></li>
+            <li><button class="dropdown-item" data-bs-toggle="tab" data-bs-target="#tab-requests" type="button">Demandes +6</button></li>
+            {% if is_granted('ROLE_ANNOUNCER') or is_granted('ROLE_ADMIN') %}
+                <li><a class="dropdown-item" href="{{ path('account_profile', {tab: 'events'}) }}">Mes annonces</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <ul class="nav nav-tabs mks-tabs mb-4 d-none d-md-flex" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link" href="{{ path('account_profile') }}">Profil</a>
         </li>

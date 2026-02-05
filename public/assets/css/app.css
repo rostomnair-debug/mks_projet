@@ -308,6 +308,12 @@ h6,
     margin-top: 1.5rem;
 }
 
+.mobile-hero-actions {
+    display: none;
+    flex-direction: row;
+    gap: 0.75rem;
+}
+
 .hero-actions .btn {
     box-shadow: 0 12px 24px rgba(14, 34, 58, 0.25);
 }
@@ -326,6 +332,31 @@ h6,
 .hero-card .btn-outline-primary {
     border-color: rgba(251, 211, 141, 0.8);
     color: var(--sand);
+}
+
+.mobile-hero-actions .btn-primary {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: #ffffff;
+    box-shadow: 0 12px 24px rgba(14, 34, 58, 0.25);
+}
+
+.mobile-hero-actions .btn-primary:hover,
+.mobile-hero-actions .btn-primary:focus {
+    background: #b9571c;
+    border-color: #b9571c;
+}
+
+.mobile-hero-actions .btn-outline-primary {
+    border-color: #0073e6;
+    color: #0073e6;
+    box-shadow: 0 12px 24px rgba(14, 34, 58, 0.25);
+}
+
+.mobile-hero-actions .btn-outline-primary:hover,
+.mobile-hero-actions .btn-outline-primary:focus {
+    background: rgba(0, 115, 230, 0.1);
+    color: #0073e6;
 }
 
 .mosaic-nav {
@@ -985,6 +1016,11 @@ h6,
     color: #0b1d3f;
 }
 
+.icon-dots {
+    width: 16px;
+    height: 16px;
+}
+
 .leaflet-popup-content-wrapper {
     border-radius: 14px;
     box-shadow: 0 10px 24px rgba(11, 29, 63, 0.18);
@@ -995,6 +1031,54 @@ h6,
 }
 
 @media (max-width: 768px) {
+    .mobile-hero-actions {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .hero-actions {
+        display: none;
+    }
+
+    .mobile-hero-actions .btn {
+        flex: 1;
+        width: auto;
+    }
+
+    .hero-stats {
+        display: none;
+    }
+
+    .site-footer {
+        text-align: center;
+    }
+
+    .site-footer .container-xl {
+        align-items: center;
+    }
+
+    body {
+        font-size: 0.95rem;
+    }
+
+    .hero-card h1 {
+        font-size: 1.8rem;
+    }
+
+    .section-title,
+    .events-section h2 {
+        font-size: 1.4rem;
+    }
+
+    .event-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .form-label,
+    .btn {
+        font-size: 0.9rem;
+    }
+
     .hero-card {
         padding: 2rem;
     }
