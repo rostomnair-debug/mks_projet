@@ -122,7 +122,7 @@ class Event
 
     public function setTitle(string $title): self
     {
-        $this->title = $title;
+        $this->title = $this->capitalizeFirst($title);
 
         return $this;
     }
@@ -146,7 +146,7 @@ class Event
 
     public function setDescription(string $description): self
     {
-        $this->description = $description;
+        $this->description = $this->capitalizeFirst($description);
 
         return $this;
     }
@@ -182,7 +182,7 @@ class Event
 
     public function setVenueName(string $venueName): self
     {
-        $this->venueName = $venueName;
+        $this->venueName = $this->capitalizeFirst($venueName);
 
         return $this;
     }
@@ -194,7 +194,7 @@ class Event
 
     public function setAddress(string $address): self
     {
-        $this->address = $address;
+        $this->address = $this->capitalizeFirst($address);
 
         return $this;
     }
@@ -206,9 +206,22 @@ class Event
 
     public function setDistrict(string $district): self
     {
-        $this->district = $district;
+        $this->district = $this->capitalizeFirst($district);
 
         return $this;
+    }
+
+    private function capitalizeFirst(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return $value;
+        }
+
+        $first = mb_substr($value, 0, 1, 'UTF-8');
+        $rest = mb_substr($value, 1, null, 'UTF-8');
+
+        return mb_strtoupper($first, 'UTF-8') . $rest;
     }
 
     public function getCapacity(): int

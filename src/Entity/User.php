@@ -104,7 +104,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setFirstName(?string $firstName): self
     {
-        $this->firstName = $firstName;
+        $this->firstName = $this->capitalizeFirst($firstName);
 
         return $this;
     }
@@ -116,9 +116,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setLastName(?string $lastName): self
     {
-        $this->lastName = $lastName;
+        $this->lastName = $this->normalizeLastName($lastName);
 
         return $this;
+    }
+
+    private function capitalizeFirst(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return $value;
+        }
+
+        $first = mb_substr($value, 0, 1, 'UTF-8');
+        $rest = mb_substr($value, 1, null, 'UTF-8');
+
+        return mb_strtoupper($first, 'UTF-8') . $rest;
+    }
+
+    private function normalizeLastName(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return $value;
+        }
+
+        $upper = mb_strtoupper($value, 'UTF-8');
+        $lower = mb_strtolower($value, 'UTF-8');
+
+        if ($value === $upper) {
+            return $value;
+        }
+
+        if ($value === $lower) {
+            return $this->capitalizeFirst($value);
+        }
+
+        return $value;
     }
 
     public function getBirthDate(): ?DateTimeImmutable

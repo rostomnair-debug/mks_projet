@@ -75,7 +75,7 @@ class EventType extends AbstractType
                 ],
             ])
             ->add('websiteUrl', null, [
-                'label' => 'Site internet',
+                'label' => 'Site Internet',
                 'required' => false,
                 'help' => 'Lien officiel de l’événement (optionnel).',
             ])

@@ -50,9 +50,22 @@ class Category
 
     public function setName(string $name): self
     {
-        $this->name = $name;
+        $this->name = $this->capitalizeFirst($name);
 
         return $this;
+    }
+
+    private function capitalizeFirst(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return $value;
+        }
+
+        $first = mb_substr($value, 0, 1, 'UTF-8');
+        $rest = mb_substr($value, 1, null, 'UTF-8');
+
+        return mb_strtoupper($first, 'UTF-8') . $rest;
     }
 
     public function getSlug(): string
